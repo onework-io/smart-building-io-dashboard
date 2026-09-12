@@ -99,6 +99,23 @@ function powerExtras(){
  ].join("");
  return '<section class="subsystem"><div class="subhead"><div><h2>發電機專屬監控</h2><p>6 台發電機的電力品質、輸出與告警。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+generator+'</div></section><section class="subsystem"><div class="subhead"><div><h2>UPS 專屬監控</h2><p>4 台 UPS 的負載、溫度與 S01～S07 狀態。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+ups+'</div><p class="footnote">UPS 原表另有「數值 × 7」，但名稱尚未確定，因此不放入計算；待補齊名稱後才能新增對應圖表。</p></section>';
 }
+function otherExtras(){
+ const charts=[
+  miniCard("土壤偵測器",miniLine([48,51,54,52,49,50,53],hours,"%"),"濕度 AI、溫度 AI、通訊狀態（故障）DI","土壤平均濕度 = Σ 上線偵測器濕度 ÷ 有效偵測器數；未命名「數值」不納入。"),
+  miniCard("小型氣象站",miniLine([26.8,27.5,28.9,30.1,30.5,29.6,28.4],hours,"°C"),"溫度 AI、通訊狀態（故障）DI","外氣溫度直接取氣象站溫度；濕度、風速、風向、雨量、光照、CO₂、大氣壓力、PM2.5、PM10 保留為同設備的獨立量測。"),
+  miniCard("接地系統監視器",bars([1.2,1.4],["監視器-01","監視器-02"],"Ω",false),"接地電阻值、電壓值、歸零值、警報設定值 AI","接地警示 = 接地電阻值 ≥ 警報設定值；圖中只比較兩台設備的接地電阻。"),
+  miniCard("截水溝淹水偵測",bars([0,0,1,0],["溝-01","溝-02","溝-03","溝-04"],"警報",true),"液位開關 DI × 2","單一設備任一液位開關為 ON，即判定該截水溝出現淹水警示。"),
+  miniCard("機坑淹水偵測",bars([0,1,0,0,0,0,0],["A1","A2","A3","A4","A5","A6","A7"],"件",true),"液位開關 DI","淹水數 = 液位開關為 ON 的機坑數；14 台設備可依區域分批顯示。"),
+  miniCard("機房漏水偵測",bars([0,1,0,0,0,0],["B1","B2","B3","B4","B5","B6"],"件",true),"漏液警報 DI、磁簧開關 DI","機房異常 = 漏液警報 ON 或磁簧開關出現非預期開啟；不同倍數點位待現場確認後套用。"),
+  miniCard("水箱液位監測",bars([0,0,1,0,0,0],["水箱1","水箱2","水箱3","水箱4","水箱5","水箱6"],"件",true),"液位開關 DI、漏液警報 DI、磁簧開關 DI","水箱異常 = 高／低液位開關、漏液警報或箱蓋磁簧異常任一為 ON。"),
+  miniCard("水箱／天井蓋磁簧開關",bars([0,0,0,1,0,0],["區1","區2","區3","區4","區5","區6"],"開啟",true),"磁簧開關 DI","非預期開啟數 = 在非維護時段磁簧開關為開啟的設備數。"),
+  miniCard("污水採樣井預留點位",miniLine([1.8,2.1,2.4,2.2,2.7,2.5,2.3],hours,"m³/h"),"瞬時流量 AI、累計流量 AI、通訊狀態（故障）DI","時段流量使用瞬時流量；今日累計量 = 目前累計流量 − 00:00 累計流量。"),
+  miniCard("網管系統（含網通設備）",miniLine([296,295,294,297,296,298,297],hours,"台"),"通訊狀態（故障）DI","在線設備數 = 納管設備總數 − 通訊故障設備數；在線率 = 在線數 ÷ 300 × 100%。"),
+  miniCard("航空障礙燈",bars([0,1],["障礙燈-01","障礙燈-02"],"故障",true),"故障／跳脫 DI、通訊狀態（故障）DI","單台異常 = 任一故障／跳脫 DI 為 ON，或通訊狀態為故障。"),
+  miniCard("電子看板",miniLine([169,170,168,171,170,169,170],hours,"台"),"通訊狀態（故障）DI","在線看板數 = 172 − 通訊故障數；在線率 = 在線看板數 ÷ 172 × 100%。")
+ ].join("");
+ return '<section class="subsystem"><div class="subhead"><div><h2>設備別獨立監控</h2><p>每一種設備各自一張圖，不跨設備混合計算。</p></div><span class="tag">12 devices · 12 charts</span></div><div class="grid chart-deck">'+charts+'</div></section>';
+}
 function overview(){
  document.title="智慧建築營運 Dashboard｜總覽";
  const cards=systems.map((s,i)=>{const c=configs[i],alarm=c.counts[2];return '<article class="card sys" data-go="'+s.id+'" tabindex="0"><div class="sys-head"><h3>'+esc(s.name)+'</h3><span class="tag">DI × AI</span></div><div class="sys-rate">'+c.rate+'%</div><div class="bar"><i style="width:'+c.rate+'%"></i></div><div class="sys-foot"><span>正常／可用率（示意）</span><span>異常 '+alarm+'</span></div></article>'}).join("");
@@ -109,6 +126,7 @@ function systemPage(id){
  const s=systems[id-1],c=configs[id-1];if(!s)return overview();document.title="智慧建築營運 Dashboard｜"+s.short;
  const kpis=c.k.map(kpiCard).join(""), total=c.counts.reduce((a,b)=>a+b,0);
  app.innerHTML='<header class="top"><div><div class="eyebrow">SYSTEM '+String(id).padStart(2,"0")+'</div><h1>'+esc(s.short)+'營運 Dashboard</h1><p>依本系統可使用的 DI 與 AI，呈現實際可落地的營運指標。</p></div><span class="demo">示意資料｜待接 BMS</span></header><div class="notice"><b>不是點位數</b><span>卡片與圖表使用 DI 的 ON／OFF 狀態及 AI 的實際讀值進行計算；點位名稱僅用來說明資料來源。</span></div><section class="grid kpis">'+kpis+'</section><section class="grid work"><article class="card panel"><div class="panel-head"><h2>'+esc(c.chart[0])+'</h2><span class="tag">今日 · 示意</span></div><div class="chart">'+lineChart(c.chart[2],c.chart[1])+'</div></article><aside class="card panel basis"><div class="panel-head"><h2>計算依據</h2><span class="tag">DI / AI</span></div><dl><div><dt>使用的訊號</dt><dd>'+esc(c.chart[3])+'</dd></div><div><dt>簡單算法</dt><dd class="formula">'+esc(c.chart[4])+'</dd></div><div><dt>資料品質</dt><dd>排除通訊故障、空值及超出合理範圍的讀值；沒有歷史資料時不顯示趨勢。</dd></div></dl></aside></section><section class="grid lower"><article class="card panel"><div class="panel-head"><h2>即時狀態分布</h2><span class="tag">DI 狀態</span></div><div class="status-wrap"><div class="ring" style="--rate:'+c.rate+'"><div><strong>'+c.rate+'%</strong><span>正常／可用率</span></div></div><div class="status-list">'+c.status.map((x,i)=>'<div class="status-row"><span>'+esc(x)+'</span><b class="'+(i===0?"ok":"bad")+'">'+c.counts[i]+'</b></div>').join("")+'<div class="formula">正常率 = '+c.counts[0]+' ÷ '+total+' × 100%</div></div></div></article><article class="card panel"><div class="panel-head"><h2>可使用的原始訊號</h2><span class="tag">源自 IO 表</span></div><div class="equipment">'+equipmentRows(s)+'</div></article></section>'+(id===1?powerExtras():"")+'<p class="footnote">所有畫面值均為介面與算法示意，不代表目前現場狀況。正式值需由 BMS／設備通訊資料提供。</p>';
+ if(id===16){app.querySelector(".work").remove();app.querySelector(".lower").remove();app.querySelector(".footnote").insertAdjacentHTML("beforebegin",otherExtras())}
 }
 function render(){const m=location.hash.match(/system-(\d+)/);const id=m?Number(m[1]):0;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",Number(b.dataset.id)===id));id?systemPage(id):overview()}
 window.addEventListener("hashchange",render);render();
