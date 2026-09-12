@@ -2,83 +2,87 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="智慧建築各系統可使用 DI 與 AI 點位 Dashboard">
-  <title>智慧建築 IO Dashboard</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1f33'/%3E%3Cpath d='M16 48V19l16-8 16 8v29H16Z' fill='none' stroke='%2320b8cd' stroke-width='4'/%3E%3Cpath d='M25 27h4m6 0h4m-14 9h4m6 0h4' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="依智慧建築 IO 表中的 DI 狀態與 AI 量測值設計之營運監控 Dashboard。">
+  <title>智慧建築營運 Dashboard</title>
   <style>
-    :root{--ink:#0b1f33;--nav:#102b46;--blue:#2376a5;--cyan:#20b8cd;--ai:#f2a93b;--paper:#f3f7fa;--line:#d7e2ea;--muted:#657787;--white:#fff;--danger:#a44b3f}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,"Noto Sans TC",sans-serif;font-size:16px;line-height:1.55}
-    button{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
-    .sidebar{position:sticky;top:0;height:100vh;background:var(--ink);color:#fff;padding:24px 18px;overflow:auto}.brand{padding:0 8px 22px;border-bottom:1px solid #29445e}.brand strong{display:block;font-size:1.12rem}.brand span{color:#a9c2d5;font-size:.83rem}
-    .nav{display:grid;gap:5px;margin-top:18px}.nav button{width:100%;border:0;border-radius:7px;background:transparent;color:#c9d8e3;text-align:left;padding:9px 11px;cursor:pointer}.nav button:hover,.nav button:focus-visible{background:#183b59;color:#fff;outline:2px solid var(--cyan);outline-offset:1px}.nav button.active{background:#1d506f;color:#fff;border-left:3px solid var(--cyan)}
-    main{min-width:0;padding:28px 34px 44px}.page{display:none;max-width:1500px;margin:0 auto}.page.active{display:block}.eyebrow{color:var(--blue);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.title-row{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:22px}.title-row h1{margin:2px 0 0;font-size:1.8rem;line-height:1.2}.stamp{color:var(--muted);font-size:.82rem;text-align:right}
-    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.kpi{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:0 2px 8px #16334c0a}.kpi span{display:block;color:var(--muted);font-size:.82rem}.kpi strong{display:block;margin-top:3px;font-size:1.65rem;line-height:1.2}.kpi.di strong{color:var(--blue)}.kpi.ai strong{color:#b66d00}
-    .visual-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(310px,.75fr);gap:16px;align-items:start}.panel{background:var(--white);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 8px #16334c0a}.panel-head{padding:15px 18px 10px;border-bottom:1px solid var(--line)}.panel-head h2{font-size:1rem;margin:0}.panel-head p{font-size:.8rem;color:var(--muted);margin:2px 0 0}.chart-wrap{padding:16px 18px;overflow:auto;max-height:560px}.chart{width:100%;min-width:630px;display:block}.legend{display:flex;gap:16px;align-items:center;font-size:.82rem;color:var(--muted);padding:0 18px 14px}.key{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}.key.di{background:var(--blue)}.key.ai{background:var(--ai)}
-    .method{padding:18px}.method h2{font-size:1rem;margin:0 0 12px}.method dl{margin:0;display:grid;gap:11px}.method dt{font-weight:700;font-size:.82rem;color:var(--blue)}.method dd{margin:2px 0 0;color:#405463;font-size:.9rem}.formula{font-family:Consolas,monospace;background:#eef5f8;border-left:3px solid var(--cyan);padding:10px 12px;border-radius:4px;font-size:.82rem}.warning{margin-top:13px;padding:10px 12px;background:#fff7e7;color:#6e5115;border:1px solid #f0d89f;border-radius:6px;font-size:.82rem}
-    .detail{margin-top:18px}.table-scroll{overflow:auto}.data-table{width:100%;border-collapse:collapse;font-size:.83rem;min-width:940px}.data-table th{position:sticky;top:0;background:var(--nav);color:#fff;text-align:left;padding:10px 11px;white-space:nowrap}.data-table td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}.data-table tbody tr:nth-child(even){background:#f7fafc}.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.muted{color:var(--muted)}.pill{display:inline-block;border-radius:99px;padding:2px 8px;background:#e5f3f5;color:#0d6671;font-size:.75rem;margin:0 4px 4px 0}.excluded{color:var(--danger)}
-    .overview-note{margin-top:18px;color:var(--muted);font-size:.86rem}.empty{padding:44px;text-align:center;color:var(--muted)}
-    @media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;padding:16px}.brand{padding-bottom:12px}.nav{display:flex;overflow:auto;gap:6px}.nav button{width:auto;white-space:nowrap;background:#173a57}.visual-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:22px 16px}.title-row{align-items:start}.stamp{display:none}}
-    @media(max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi{padding:13px}.kpi strong{font-size:1.35rem}.title-row h1{font-size:1.45rem}.chart{min-width:560px}}
-    @media print{.app{display:block}.sidebar{display:none}main{padding:0}.page{display:none}.page.active{display:block}.panel,.kpi{box-shadow:none}.visual-grid{grid-template-columns:1.6fr .8fr}.chart-wrap{max-height:none}.detail{break-before:page}}
+    :root{--ink:#132438;--muted:#66788a;--line:#dce6ef;--paper:#fff;--bg:#f3f7fa;--blue:#087dbb;--cyan:#24c3d8;--green:#18a875;--amber:#e9a61a;--red:#e75d57;--nav:#0c2738}
+    *{box-sizing:border-box}html{font-size:16px;scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font-family:"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.5}
+    button{font:inherit}.shell{min-height:100vh;display:grid;grid-template-columns:248px 1fr}.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--nav);color:#d9e7ef;padding:22px 14px}
+    .brand{padding:0 10px 20px;border-bottom:1px solid #274456}.brand strong{display:block;color:white;font-size:1.18rem}.brand span{font-size:.83rem;color:#98b2c1}
+    .nav{display:grid;gap:4px;margin-top:18px}.nav button{border:0;border-radius:9px;padding:9px 12px;text-align:left;background:transparent;color:#c5d7e2;cursor:pointer}.nav button:hover,.nav button.active{background:#15445d;color:#fff}.nav button.active{box-shadow:inset 3px 0 var(--cyan)}
+    main{min-width:0;padding:28px 32px 42px}.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:20px}.eyebrow{font-size:.78rem;letter-spacing:.12em;color:var(--blue);font-weight:700}.top h1{margin:3px 0 2px;font-size:clamp(1.6rem,3vw,2.35rem);letter-spacing:-.03em}.top p{margin:0;color:var(--muted)}
+    .demo{flex:none;border:1px solid #efc86a;background:#fff7d8;color:#765214;border-radius:999px;padding:7px 12px;font-size:.82rem;font-weight:700}
+    .notice{display:flex;gap:10px;align-items:flex-start;padding:12px 15px;border:1px solid #b9d9e8;border-radius:11px;background:#ecf8fd;color:#31576b;margin-bottom:18px;font-size:.9rem}.notice b{color:#075f8b}
+    .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(22,57,79,.055)}.kpi{padding:17px 18px;min-height:118px;position:relative;overflow:hidden}.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}.kpi.green:before{background:var(--green)}.kpi.amber:before{background:var(--amber)}.kpi.red:before{background:var(--red)}
+    .kpi-label{color:var(--muted);font-size:.85rem}.kpi-value{font-size:1.9rem;font-weight:760;letter-spacing:-.03em;margin:6px 0 2px}.kpi-value small{font-size:.9rem;margin-left:4px;font-weight:600;color:var(--muted)}.kpi-note{font-size:.78rem;color:var(--muted)}
+    .work{grid-template-columns:minmax(0,1.55fr) minmax(290px,.75fr);align-items:stretch;margin-bottom:16px}.panel{padding:19px 20px}.panel-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px}.panel h2{font-size:1.05rem;margin:0}.tag{font-size:.73rem;border-radius:999px;background:#eef4f7;color:#587080;padding:4px 8px}
+    .chart{height:245px;display:flex;align-items:stretch}.chart svg{width:100%;height:100%;overflow:visible}.chart text{font-size:11px;fill:#7d8b98}.gridline{stroke:#e5edf2;stroke-width:1}.axisline{stroke:#b9c8d2}.area{fill:url(#areaFill)}.series{fill:none;stroke:var(--cyan);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.series2{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 5}.dot{fill:#fff;stroke:var(--cyan);stroke-width:2}
+    .basis{background:#102f41;color:#dcebf3;border-color:#102f41}.basis h2{color:white}.basis .tag{background:#20485f;color:#d7edf7}.basis dl{margin:0;display:grid;gap:14px}.basis dt{font-size:.76rem;letter-spacing:.08em;color:#7fd6e6;font-weight:700}.basis dd{margin:3px 0 0;color:#e8f1f6;font-size:.9rem}.formula{padding:11px 12px;border-radius:9px;background:#173c51;color:white;font-weight:650}
+    .lower{grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr)}.status-wrap{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:center}.ring{width:128px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--rate)*1%),#e8eef2 0);position:relative}.ring:after{content:"";position:absolute;inset:13px;border-radius:50%;background:white}.ring div{z-index:1;text-align:center}.ring strong{display:block;font-size:1.55rem}.ring span{font-size:.72rem;color:var(--muted)}
+    .status-list{display:grid;gap:8px}.status-row{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:6px;font-size:.88rem}.status-row b.ok{color:var(--green)}.status-row b.bad{color:var(--red)}
+    .equipment{max-height:310px;overflow:auto}.eq{padding:11px 0;border-bottom:1px solid var(--line)}.eq:last-child{border-bottom:0}.eq-top{display:flex;justify-content:space-between;gap:12px}.eq strong{font-size:.9rem}.qty{font-size:.75rem;color:var(--muted);white-space:nowrap}.signal{font-size:.78rem;color:var(--muted);margin-top:5px}.signal b{color:var(--ink)}.empty{padding:28px;color:var(--muted);text-align:center}
+    .overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.sys{padding:15px;cursor:pointer;transition:.18s}.sys:hover{transform:translateY(-2px);box-shadow:0 9px 24px rgba(22,57,79,.1)}.sys-head{display:flex;justify-content:space-between;gap:10px}.sys h3{margin:0;font-size:.96rem}.sys-rate{font-size:1.55rem;font-weight:760;margin:13px 0 3px}.bar{height:6px;background:#e7edf1;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:99px}.sys-foot{display:flex;justify-content:space-between;margin-top:7px;color:var(--muted);font-size:.75rem}.footnote{margin-top:16px;color:var(--muted);font-size:.78rem}
+    @media(max-width:1050px){.kpis,.overview{grid-template-columns:repeat(2,minmax(0,1fr))}.work,.lower{grid-template-columns:1fr}}@media(max-width:760px){.shell{display:block}.side{position:static;height:auto;padding:14px}.brand{padding-bottom:12px}.nav{display:flex;overflow:auto;margin-top:12px}.nav button{white-space:nowrap}.nav button.active{box-shadow:inset 0 -3px var(--cyan)}main{padding:20px 14px}.top{display:block}.demo{display:inline-block;margin-top:12px}.kpis,.overview{grid-template-columns:1fr}.status-wrap{grid-template-columns:1fr}.ring{margin:auto}}
   </style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar"><div class="brand"><strong>智慧建築 IO</strong><span>DI / AI 可使用點位</span></div><nav class="nav" id="nav" aria-label="系統分頁"></nav></aside>
-  <main id="main"></main>
+<div class="shell">
+  <aside class="side"><div class="brand"><strong>智慧建築營運看板</strong><span>DI 狀態 × AI 量測</span></div><nav class="nav" id="nav" aria-label="系統分頁"></nav></aside>
+  <main id="app"></main>
 </div>
 <script>
-const systems=__DATA_JSON__;
-const fmt=n=>Number(n||0).toLocaleString('zh-TW');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const grand={di:systems.reduce((s,x)=>s+x.di,0),ai:systems.reduce((s,x)=>s+x.ai,0)};
-
-function chartSvg(rows, title){
-  const shown=rows.filter(r=>r.di>0||r.ai>0).sort((a,b)=>(b.di+b.ai)-(a.di+a.ai));
-  if(!shown.length)return '<div class="empty">此頁沒有可明確計數的 DI／AI 點位</div>';
-  const width=900,labelW=215,right=64,rowH=38,top=24,height=Math.max(180,top+shown.length*rowH+24);
-  const max=Math.max(...shown.map(r=>Math.max(r.di,r.ai)),1),plotW=width-labelW-right;
-  const ticks=[0,.25,.5,.75,1].map(p=>Math.round(max*p));
-  let svg=`<svg class="chart" role="img" aria-label="${esc(title)}" viewBox="0 0 ${width} ${height}" style="height:${height}px">`;
-  ticks.forEach((tick,i)=>{const x=labelW+(plotW*i/4);svg+=`<line x1="${x}" y1="10" x2="${x}" y2="${height-20}" stroke="#e2e9ef"/><text x="${x}" y="${height-3}" text-anchor="middle" fill="#657787" font-size="12">${fmt(tick)}</text>`});
-  shown.forEach((r,i)=>{const y=top+i*rowH;const diW=r.di/max*plotW,aiW=r.ai/max*plotW;svg+=`<text x="${labelW-10}" y="${y+14}" text-anchor="end" fill="#243b4c" font-size="12">${esc(r.label)}</text><rect x="${labelW}" y="${y}" width="${diW}" height="11" rx="3" fill="#2376a5"><title>DI ${fmt(r.di)} 點</title></rect><rect x="${labelW}" y="${y+15}" width="${aiW}" height="11" rx="3" fill="#f2a93b"><title>AI ${fmt(r.ai)} 點</title></rect>`});
-  return svg+'</svg>';
+const systems=__SYSTEM_DATA__;
+const hours=["08:00","10:00","12:00","14:00","16:00","18:00","20:00"];
+const configs=[
+ {k:[["即時總需量","2,846","kW","有效功率 kW 加總"],["今日用電","21,380","kWh","累積電量日差值"],["平均功率因數","0.96","PF","各電表有效值平均"],["異常盤數","4","面","故障／通訊故障 DI"]],chart:["用電需量趨勢","kW",[2410,2660,2510,2790,2680,2920,2846],"有效功率 kW（各電表）","總需量 = Σ 各有效功率 kW"],rate:96,status:["正常供電","離線","告警"],counts:[204,5,4]},
+ {k:[["照明開啟率","68","%","狀態 DI"],["開啟迴路","2,526","迴路","狀態=ON"],["通訊正常率","99.4","%","通訊故障 DI 反算"],["異常迴路","22","迴路","故障 DI"]],chart:["啟用照明迴路","迴路",[1880,2250,2690,2810,2760,2650,2526],"照明狀態 DI","開啟率 = ON 迴路 ÷ 可用迴路 × 100%"],rate:99,status:["通訊正常","離線","告警"],counts:[3691,8,22]},
+ {k:[["設備運轉率","80","%","狀態／運轉狀態 DI"],["空調總需量","286","kW","實功率 kW 加總"],["室內平均溫度","24.3","°C","室內／迴風溫度 AI"],["空氣品質警示","3","區","CO₂／PM2.5 門檻"]],chart:["空調總需量趨勢","kW",[252,225,268,251,278,291,286],"空調電表實功率 kW","總需量 = Σ 空調電表有效實功率 kW"],rate:80,status:["正常運轉","離線","故障"],counts:[123,28,3]},
+ {k:[["系統正常率","99.7","%","故障／警報 DI"],["未復歸警報","4","件","警報 DI=ON"],["設備故障","2","件","故障 DI=ON"],["通訊異常","1","台","通訊故障 DI"]],chart:["消防事件趨勢","件",[0,1,0,2,1,0,1],"警報、故障 DI","每時段事件數 = 該時段 DI 由 OFF 轉 ON 的次數"],rate:99,status:["正常","警報","故障"],counts:[485,4,2]},
+ {k:[["泵浦運轉率","62","%","狀態 DI"],["運轉泵浦","38","台","狀態=ON"],["故障泵浦","2","台","故障／跳脫 DI"],["高液位警示","1","處","液位開關 DI"]],chart:["泵浦運轉台數","台",[22,31,29,36,33,40,38],"狀態、故障／跳脫、液位開關 DI","運轉率 = 運轉台數 ÷ 可用泵浦台數 × 100%"],rate:96,status:["可用","故障","高液位"],counts:[59,2,1]},
+ {k:[["今日用水","1,286","m³","累計流量日差值"],["即時流量","84.2","m³/h","瞬時流量 AI 加總"],["平均每時用量","64.3","m³","今日用量 ÷ 已經過小時"],["通訊正常率","98.8","%","通訊故障 DI"]],chart:["園區每時用水量","m³/h",[58,71,92,88,76,95,84],"瞬時流量、累計流量 AI","今日用水 = 目前累計流量 − 00:00 累計流量"],rate:99,status:["上線","離線","流量異常"],counts:[420,5,3]},
+ {k:[["攝影機上線率","98.1","%","狀態／故障 DI"],["正常影像","1,288","支","狀態=ON"],["離線攝影機","21","支","狀態=OFF"],["設備故障","4","支","故障 DI"]],chart:["在線攝影機","支",[1298,1292,1289,1284,1291,1286,1288],"狀態、故障 DI","上線率 = 正常影像數 ÷ 納管攝影機數 × 100%"],rate:98,status:["正常影像","離線","故障"],counts:[1288,21,4]},
+ {k:[["設備上線率","99.1","%","狀態／通訊故障 DI"],["門禁警報","6","件","警報 DI=ON"],["離線設備","10","台","通訊故障 DI"],["正常設備","1,138","台","狀態正常"]],chart:["門禁警報事件","件",[1,0,2,1,3,1,2],"警報、狀態、通訊故障 DI","事件數 = 指定時段警報 DI 觸發次數"],rate:99,status:["正常","離線","警報"],counts:[1138,10,6]},
+ {k:[["設備上線率","98.5","%","通訊故障 DI"],["進行中求救","2","件","警報 DI=ON"],["今日求救","9","件","警報 DI 觸發紀錄"],["離線設備","5","台","通訊故障 DI"]],chart:["求救事件趨勢","件",[0,1,2,0,3,1,2],"警報、通訊故障 DI","今日求救 = 今日警報 DI 由 OFF 轉 ON 次數"],rate:98,status:["待命","求救中","離線"],counts:[329,2,5]},
+ {k:[["安防正常率","98.8","%","狀態／故障 DI"],["開門異常","3","處","門位狀態 DI"],["瓦斯警報","0","處","警報 DI"],["設備故障","2","台","故障 DI"]],chart:["安防事件趨勢","件",[0,1,0,2,1,1,0],"警報、故障、門位狀態 DI","異常數 = 警報 ON + 故障 ON + 非預期開門"],rate:99,status:["正常","異常開門","故障"],counts:[327,3,2]},
+ {k:[["柵欄機正常率","95","%","狀態 DI"],["運轉柵欄機","19","台","狀態=ON"],["故障設備","1","台","通訊故障 DI"],["顯示器狀態","待接","—","目前無可用 DI／AI"]],chart:["柵欄機可用狀態","台",[20,20,19,19,20,19,19],"狀態、通訊故障 DI","正常率 = 狀態正常柵欄機 ÷ 柵欄機總數 × 100%"],rate:95,status:["正常","離線","告警"],counts:[19,1,0]},
+ {k:[["充電樁上線率","94.1","%","狀態／通訊故障 DI"],["充電中","11","槍","狀態 DI"],["即時功率","168","kW","有效功率 kW 加總"],["今日充電量","1,142","kWh","累積 kWh 日差值"]],chart:["充電功率趨勢","kW",[72,96,154,181,132,176,168],"有效功率 kW、仟瓦時 kWh","今日充電量 = 目前 kWh − 00:00 kWh"],rate:94,status:["上線","離線","警報"],counts:[32,2,0]},
+ {k:[["今日發電量","3,842","kWh","Energy Today"],["累積發電量","2.41","GWh","Energy Total 加總"],["發電中逆變器","22","台","Operating Mode=3"],["故障暫存器","1","組","Error Message 1–3"]],chart:["太陽能發電趨勢","kW",[86,221,358,402,337,172,48],"Energy Today、Operating Mode","時段發電量 = 相鄰 Energy Today 讀值差；發電率 = 模式3台數 ÷ 24"],rate:92,status:["發電中","待命","故障"],counts:[22,1,1]},
+ {k:[["電梯可用率","96.1","%","狀態／故障 DI"],["運轉中","43","台","狀態 DI"],["故障停機","3","台","故障 DI"],["即時用電","218","kW","回電電表有效功率"]],chart:["電梯用電趨勢","kW",[146,191,224,205,239,227,218],"有效功率 kW、狀態 DI","每時用電 = Σ 回電電表有效功率 kW"],rate:96,status:["可用","故障","通訊異常"],counts:[74,3,0]},
+ {k:[["泵浦可用率","87.5","%","狀態／故障 DI"],["運轉泵浦","6","台","狀態=ON"],["故障泵浦","2","台","故障／跳脫 DI"],["溢位警示","0","處","液位開關 DI"]],chart:["噴灌泵浦運轉台數","台",[2,4,5,3,6,7,6],"狀態、手動／自動、故障 DI","可用率 = 無故障泵浦 ÷ 納管泵浦 × 100%"],rate:88,status:["可用","故障","溢位"],counts:[14,2,0]},
+ {k:[["外氣溫度","28.4","°C","氣象站溫度 AI"],["外氣濕度","63","%RH","氣象站濕度 AI"],["PM2.5","12","µg/m³","氣象站／空品 AI"],["淹水警示","1","處","液位／漏液警報 DI"]],chart:["外氣環境趨勢","°C",[26.8,27.5,28.9,30.1,30.5,29.6,28.4],"溫度、濕度、PM2.5、雨量 AI","平均溫度 = Σ 有效溫度 AI ÷ 有效感測器數"],rate:98,status:["正常","離線","環境警示"],counts:[510,9,1]}
+];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const nav=document.getElementById("nav"),app=document.getElementById("app");
+nav.innerHTML='<button data-id="0">總覽 Overview</button>'+systems.map(s=>'<button data-id="'+s.id+'">'+esc(s.name)+'</button>').join("");
+nav.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;location.hash=b.dataset.id==="0"?"overview":"system-"+b.dataset.id});
+function lineChart(values,unit){
+ const w=720,h=225,p={l:42,r:15,t:15,b:30},min=Math.min(...values)*.88,max=Math.max(...values)*1.08||1;
+ const x=i=>p.l+i*(w-p.l-p.r)/(values.length-1),y=v=>p.t+(max-v)*(h-p.t-p.b)/(max-min||1);
+ const points=values.map((v,i)=>x(i)+","+y(v)).join(" ");
+ const area=points+" "+x(values.length-1)+","+(h-p.b)+" "+x(0)+","+(h-p.b);
+ let grid="";for(let i=0;i<5;i++){const yy=p.t+i*(h-p.t-p.b)/4;const val=Math.round(max-i*(max-min)/4);grid+='<line class="gridline" x1="'+p.l+'" y1="'+yy+'" x2="'+(w-p.r)+'" y2="'+yy+'"/><text x="2" y="'+(yy+4)+'">'+val+'</text>'}
+ const labels=hours.map((t,i)=>'<text text-anchor="middle" x="'+x(i)+'" y="'+(h-7)+'">'+t+'</text>').join("");
+ return '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="示意趨勢圖"><defs><linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#24c3d8" stop-opacity=".28"/><stop offset="1" stop-color="#24c3d8" stop-opacity=".02"/></linearGradient></defs>'+grid+'<polygon class="area" points="'+area+'"/><polyline class="series" points="'+points+'"/>'+values.map((v,i)=>'<circle class="dot" cx="'+x(i)+'" cy="'+y(v)+'" r="3"/>').join("")+labels+'<text x="'+(w-20)+'" y="12">'+esc(unit)+'</text></svg>';
 }
-
-function rowDetails(row){
-  const included=row.included.map(p=>`<span class="pill">${esc(p.field)}｜${esc(p.label)}</span><div class="muted">${esc(p.calculation)}</div>`).join('');
-  const excluded=row.excluded.length?`<span class="excluded">未計：${esc(row.excluded.join('、'))}</span>`:'—';
-  return `<tr><td><strong>${esc(row.equipment)}</strong><div class="muted">設備數量：${row.quantity===null?'未明':fmt(row.quantity)}</div></td><td class="num">${fmt(row.di)}</td><td class="num">${fmt(row.ai)}</td><td>${included||'沒有納入點位'}</td><td>${excluded}</td></tr>`;
+function kpiCard(k,i){return '<article class="card kpi '+(["","green","amber","red"][i]||"")+'"><div class="kpi-label">'+esc(k[0])+'</div><div class="kpi-value">'+esc(k[1])+'<small>'+esc(k[2])+'</small></div><div class="kpi-note">依據：'+esc(k[3])+' · 示意</div></article>'}
+function equipmentRows(s){
+ if(!s.groups.length)return '<div class="empty">此系統目前沒有可用的 DI／AI。</div>';
+ return s.groups.map(g=>'<div class="eq"><div class="eq-top"><strong>'+esc(g.group+(g.equipment&&g.equipment!=="—"?" · "+g.equipment:""))+'</strong><span class="qty">'+(g.quantity==null?"數量待確認":esc(g.quantity)+" 台／組")+'</span></div>'+(g.di.length?'<div class="signal"><b>DI：</b>'+esc(g.di.join("；"))+'</div>':"")+(g.ai.length?'<div class="signal"><b>AI：</b>'+esc(g.ai.join("；"))+'</div>':"")+'</div>').join("");
 }
-
-function systemPage(system){
-  const chartRows=system.rows.map(r=>({label:r.equipment,di:r.di,ai:r.ai}));
-  const included=system.rows.filter(r=>r.di>0||r.ai>0).map(r=>r.equipment);
-  const excluded=system.rows.filter(r=>r.di===0&&r.ai===0).map(r=>r.equipment);
-  return `<section class="page" id="${system.id}"><div class="title-row"><div><div class="eyebrow">系統分頁</div><h1>${esc(system.name)}</h1></div><div class="stamp">來源：Excel「${esc(system.name)}」TAB</div></div>
-  <div class="kpis"><div class="kpi di"><span>可使用 DI</span><strong>${fmt(system.di)}</strong></div><div class="kpi ai"><span>可使用 AI</span><strong>${fmt(system.ai)}</strong></div><div class="kpi"><span>DI＋AI</span><strong>${fmt(system.di+system.ai)}</strong></div><div class="kpi"><span>有可用點位的設備類型</span><strong>${included.length}</strong></div></div>
-  <div class="visual-grid"><div class="panel"><div class="panel-head"><h2>設備類型可使用點位</h2><p>只顯示能明確換算點數的 DI 與 AI</p></div><div class="chart-wrap">${chartSvg(chartRows,system.name+'設備類型可使用點位')}</div><div class="legend"><span><i class="key di"></i>DI</span><span><i class="key ai"></i>AI</span></div></div>
-  <aside class="panel method"><h2>這張圖拿什麼計算</h2><dl><div><dt>資料來源</dt><dd>Excel「${esc(system.name)}」TAB 的設備類型、設備數量、DI、通訊DI、AI、通訊AI${system.category==='電力 01'?'、APFR及發電機共用訊號':''}。</dd></div><div><dt>納入設備</dt><dd>${esc(included.join('、')||'無')}</dd></div><div><dt>簡單計算</dt><dd class="formula">DI＝Σ（明確 DI 單台點數 × 設備數量）<br>AI＝Σ（明確 AI 單台點數 × 設備數量）<br>群組總計＝直接採用原列總數</dd></div><div><dt>不納入</dt><dd>DO、AO、待填、泛稱「數值」、非整數、數量範圍與設備數量未明的點位。</dd></div></dl>${excluded.length?`<div class="warning">本頁沒有可計數點位的設備：${esc(excluded.join('、'))}</div>`:''}</aside></div>
-  <div class="panel detail"><div class="panel-head"><h2>設備別計算明細</h2><p>每個數字都列出實際採用的點位與乘算方式</p></div><div class="table-scroll"><table class="data-table"><thead><tr><th>設備類型</th><th>可使用DI</th><th>可使用AI</th><th>納入點位與計算</th><th>排除／備註</th></tr></thead><tbody>${system.rows.map(rowDetails).join('')}</tbody></table></div></div></section>`;
+function overview(){
+ document.title="智慧建築營運 Dashboard｜總覽";
+ const cards=systems.map((s,i)=>{const c=configs[i],alarm=c.counts[2];return '<article class="card sys" data-go="'+s.id+'" tabindex="0"><div class="sys-head"><h3>'+esc(s.name)+'</h3><span class="tag">DI × AI</span></div><div class="sys-rate">'+c.rate+'%</div><div class="bar"><i style="width:'+c.rate+'%"></i></div><div class="sys-foot"><span>正常／可用率（示意）</span><span>異常 '+alarm+'</span></div></article>'}).join("");
+ app.innerHTML='<header class="top"><div><div class="eyebrow">OPERATIONS OVERVIEW</div><h1>智慧建築營運總覽</h1><p>用可使用的 DI 狀態與 AI 量測值，快速看運轉、異常與趨勢。</p></div><span class="demo">示意資料｜待接 BMS</span></header><div class="notice"><b>資料說明</b><span>IO 表只定義可用訊號，沒有現場即時讀值與歷史紀錄。以下數字用來示範計算與版面，正式串接 BMS 後再替換成實際值。</span></div><section class="overview">'+cards+'</section><p class="footnote">點選任一系統卡進入分頁；每張圖旁均列出使用訊號與計算方式。</p>';
+ app.querySelectorAll("[data-go]").forEach(el=>{const go=()=>location.hash="system-"+el.dataset.go;el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter")go()}});
 }
-
-function overviewPage(){
-  const rows=systems.map(s=>({label:s.name,di:s.di,ai:s.ai}));
-  return `<section class="page" id="overview"><div class="title-row"><div><div class="eyebrow">總覽</div><h1>智慧建築可使用 DI／AI 點位</h1></div><div class="stamp">共 16 類系統</div></div>
-  <div class="kpis"><div class="kpi di"><span>可使用 DI</span><strong>${fmt(grand.di)}</strong></div><div class="kpi ai"><span>可使用 AI</span><strong>${fmt(grand.ai)}</strong></div><div class="kpi"><span>DI＋AI</span><strong>${fmt(grand.di+grand.ai)}</strong></div><div class="kpi"><span>系統類別</span><strong>16</strong></div></div>
-  <div class="visual-grid"><div class="panel"><div class="panel-head"><h2>各系統可使用點位</h2><p>依可明確計數的點位加總</p></div><div class="chart-wrap">${chartSvg(rows,'各系統可使用DI與AI點位')}</div><div class="legend"><span><i class="key di"></i>DI</span><span><i class="key ai"></i>AI</span></div></div>
-  <aside class="panel method"><h2>這張圖拿什麼計算</h2><dl><div><dt>來源</dt><dd>16 個系統 TAB 的設備點位清單。</dd></div><div><dt>DI</dt><dd>數位輸入與通訊DI；電力頁另包含可明確計數的 APFR 與發電機共用數位訊號。</dd></div><div><dt>AI</dt><dd>類比輸入與通訊AI。</dd></div><div><dt>簡單計算</dt><dd class="formula">各系統 DI＝該系統設備 DI 加總<br>各系統 AI＝該系統設備 AI 加總</dd></div><div><dt>排除</dt><dd>DO、AO、待填及無法確認單台數量的點位。</dd></div></dl></aside></div>
-  <div class="panel detail"><div class="panel-head"><h2>系統合計</h2><p>點選左側分頁可查看設備別明細</p></div><div class="table-scroll"><table class="data-table"><thead><tr><th>系統TAB</th><th>可使用DI</th><th>可使用AI</th><th>合計</th></tr></thead><tbody>${systems.map(s=>`<tr><td><strong>${esc(s.name)}</strong></td><td class="num">${fmt(s.di)}</td><td class="num">${fmt(s.ai)}</td><td class="num">${fmt(s.di+s.ai)}</td></tr>`).join('')}</tbody></table></div></div></section>`;
+function systemPage(id){
+ const s=systems[id-1],c=configs[id-1];if(!s)return overview();document.title="智慧建築營運 Dashboard｜"+s.short;
+ const kpis=c.k.map(kpiCard).join(""), total=c.counts.reduce((a,b)=>a+b,0);
+ app.innerHTML='<header class="top"><div><div class="eyebrow">SYSTEM '+String(id).padStart(2,"0")+'</div><h1>'+esc(s.short)+'營運 Dashboard</h1><p>依本系統可使用的 DI 與 AI，呈現實際可落地的營運指標。</p></div><span class="demo">示意資料｜待接 BMS</span></header><div class="notice"><b>不是點位數</b><span>卡片與圖表使用 DI 的 ON／OFF 狀態及 AI 的實際讀值進行計算；點位名稱僅用來說明資料來源。</span></div><section class="grid kpis">'+kpis+'</section><section class="grid work"><article class="card panel"><div class="panel-head"><h2>'+esc(c.chart[0])+'</h2><span class="tag">今日 · 示意</span></div><div class="chart">'+lineChart(c.chart[2],c.chart[1])+'</div></article><aside class="card panel basis"><div class="panel-head"><h2>計算依據</h2><span class="tag">DI / AI</span></div><dl><div><dt>使用的訊號</dt><dd>'+esc(c.chart[3])+'</dd></div><div><dt>簡單算法</dt><dd class="formula">'+esc(c.chart[4])+'</dd></div><div><dt>資料品質</dt><dd>排除通訊故障、空值及超出合理範圍的讀值；沒有歷史資料時不顯示趨勢。</dd></div></dl></aside></section><section class="grid lower"><article class="card panel"><div class="panel-head"><h2>即時狀態分布</h2><span class="tag">DI 狀態</span></div><div class="status-wrap"><div class="ring" style="--rate:'+c.rate+'"><div><strong>'+c.rate+'%</strong><span>正常／可用率</span></div></div><div class="status-list">'+c.status.map((x,i)=>'<div class="status-row"><span>'+esc(x)+'</span><b class="'+(i===0?"ok":"bad")+'">'+c.counts[i]+'</b></div>').join("")+'<div class="formula">正常率 = '+c.counts[0]+' ÷ '+total+' × 100%</div></div></div></article><article class="card panel"><div class="panel-head"><h2>可使用的原始訊號</h2><span class="tag">源自 IO 表</span></div><div class="equipment">'+equipmentRows(s)+'</div></article></section><p class="footnote">所有畫面值均為介面與算法示意，不代表目前現場狀況。正式值需由 BMS／設備通訊資料提供。</p>';
 }
-
-const nav=document.getElementById('nav');
-nav.innerHTML=`<button data-page="overview">總覽</button>${systems.map(s=>`<button data-page="${s.id}">${esc(s.name)}</button>`).join('')}`;
-document.getElementById('main').innerHTML=overviewPage()+systems.map(systemPage).join('');
-function showPage(id){if(!document.getElementById(id))id='overview';document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'})}
-nav.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page)});
-window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)));
-showPage(location.hash.slice(1)||'overview');
+function render(){const m=location.hash.match(/system-(\d+)/);const id=m?Number(m[1]):0;document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",Number(b.dataset.id)===id));id?systemPage(id):overview()}
+window.addEventListener("hashchange",render);render();
 </script>
 </body>
 </html>
