@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="智慧建築各系統可使用 DI 與 AI 點位 Dashboard">
+  <title>智慧建築 IO Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1f33'/%3E%3Cpath d='M16 48V19l16-8 16 8v29H16Z' fill='none' stroke='%2320b8cd' stroke-width='4'/%3E%3Cpath d='M25 27h4m6 0h4m-14 9h4m6 0h4' stroke='%23fff' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#0b1f33;--nav:#102b46;--blue:#2376a5;--cyan:#20b8cd;--ai:#f2a93b;--paper:#f3f7fa;--line:#d7e2ea;--muted:#657787;--white:#fff;--danger:#a44b3f}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,"Noto Sans TC",sans-serif;font-size:16px;line-height:1.55}
+    button{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
+    .sidebar{position:sticky;top:0;height:100vh;background:var(--ink);color:#fff;padding:24px 18px;overflow:auto}.brand{padding:0 8px 22px;border-bottom:1px solid #29445e}.brand strong{display:block;font-size:1.12rem}.brand span{color:#a9c2d5;font-size:.83rem}
+    .nav{display:grid;gap:5px;margin-top:18px}.nav button{width:100%;border:0;border-radius:7px;background:transparent;color:#c9d8e3;text-align:left;padding:9px 11px;cursor:pointer}.nav button:hover,.nav button:focus-visible{background:#183b59;color:#fff;outline:2px solid var(--cyan);outline-offset:1px}.nav button.active{background:#1d506f;color:#fff;border-left:3px solid var(--cyan)}
+    main{min-width:0;padding:28px 34px 44px}.page{display:none;max-width:1500px;margin:0 auto}.page.active{display:block}.eyebrow{color:var(--blue);font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.title-row{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:22px}.title-row h1{margin:2px 0 0;font-size:1.8rem;line-height:1.2}.stamp{color:var(--muted);font-size:.82rem;text-align:right}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}.kpi{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:16px 18px;box-shadow:0 2px 8px #16334c0a}.kpi span{display:block;color:var(--muted);font-size:.82rem}.kpi strong{display:block;margin-top:3px;font-size:1.65rem;line-height:1.2}.kpi.di strong{color:var(--blue)}.kpi.ai strong{color:#b66d00}
+    .visual-grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(310px,.75fr);gap:16px;align-items:start}.panel{background:var(--white);border:1px solid var(--line);border-radius:10px;box-shadow:0 2px 8px #16334c0a}.panel-head{padding:15px 18px 10px;border-bottom:1px solid var(--line)}.panel-head h2{font-size:1rem;margin:0}.panel-head p{font-size:.8rem;color:var(--muted);margin:2px 0 0}.chart-wrap{padding:16px 18px;overflow:auto;max-height:560px}.chart{width:100%;min-width:630px;display:block}.legend{display:flex;gap:16px;align-items:center;font-size:.82rem;color:var(--muted);padding:0 18px 14px}.key{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}.key.di{background:var(--blue)}.key.ai{background:var(--ai)}
+    .method{padding:18px}.method h2{font-size:1rem;margin:0 0 12px}.method dl{margin:0;display:grid;gap:11px}.method dt{font-weight:700;font-size:.82rem;color:var(--blue)}.method dd{margin:2px 0 0;color:#405463;font-size:.9rem}.formula{font-family:Consolas,monospace;background:#eef5f8;border-left:3px solid var(--cyan);padding:10px 12px;border-radius:4px;font-size:.82rem}.warning{margin-top:13px;padding:10px 12px;background:#fff7e7;color:#6e5115;border:1px solid #f0d89f;border-radius:6px;font-size:.82rem}
+    .detail{margin-top:18px}.table-scroll{overflow:auto}.data-table{width:100%;border-collapse:collapse;font-size:.83rem;min-width:940px}.data-table th{position:sticky;top:0;background:var(--nav);color:#fff;text-align:left;padding:10px 11px;white-space:nowrap}.data-table td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}.data-table tbody tr:nth-child(even){background:#f7fafc}.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.muted{color:var(--muted)}.pill{display:inline-block;border-radius:99px;padding:2px 8px;background:#e5f3f5;color:#0d6671;font-size:.75rem;margin:0 4px 4px 0}.excluded{color:var(--danger)}
+    .overview-note{margin-top:18px;color:var(--muted);font-size:.86rem}.empty{padding:44px;text-align:center;color:var(--muted)}
+    @media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;padding:16px}.brand{padding-bottom:12px}.nav{display:flex;overflow:auto;gap:6px}.nav button{width:auto;white-space:nowrap;background:#173a57}.visual-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:22px 16px}.title-row{align-items:start}.stamp{display:none}}
+    @media(max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpi{padding:13px}.kpi strong{font-size:1.35rem}.title-row h1{font-size:1.45rem}.chart{min-width:560px}}
+    @media print{.app{display:block}.sidebar{display:none}main{padding:0}.page{display:none}.page.active{display:block}.panel,.kpi{box-shadow:none}.visual-grid{grid-template-columns:1.6fr .8fr}.chart-wrap{max-height:none}.detail{break-before:page}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"><div class="brand"><strong>智慧建築 IO</strong><span>DI / AI 可使用點位</span></div><nav class="nav" id="nav" aria-label="系統分頁"></nav></aside>
+  <main id="main"></main>
+</div>
+<script>
+const systems=__DATA_JSON__;
+const fmt=n=>Number(n||0).toLocaleString('zh-TW');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const grand={di:systems.reduce((s,x)=>s+x.di,0),ai:systems.reduce((s,x)=>s+x.ai,0)};
+
+function chartSvg(rows, title){
+  const shown=rows.filter(r=>r.di>0||r.ai>0).sort((a,b)=>(b.di+b.ai)-(a.di+a.ai));
+  if(!shown.length)return '<div class="empty">此頁沒有可明確計數的 DI／AI 點位</div>';
+  const width=900,labelW=215,right=64,rowH=38,top=24,height=Math.max(180,top+shown.length*rowH+24);
+  const max=Math.max(...shown.map(r=>Math.max(r.di,r.ai)),1),plotW=width-labelW-right;
+  const ticks=[0,.25,.5,.75,1].map(p=>Math.round(max*p));
+  let svg=`<svg class="chart" role="img" aria-label="${esc(title)}" viewBox="0 0 ${width} ${height}" style="height:${height}px">`;
+  ticks.forEach((tick,i)=>{const x=labelW+(plotW*i/4);svg+=`<line x1="${x}" y1="10" x2="${x}" y2="${height-20}" stroke="#e2e9ef"/><text x="${x}" y="${height-3}" text-anchor="middle" fill="#657787" font-size="12">${fmt(tick)}</text>`});
+  shown.forEach((r,i)=>{const y=top+i*rowH;const diW=r.di/max*plotW,aiW=r.ai/max*plotW;svg+=`<text x="${labelW-10}" y="${y+14}" text-anchor="end" fill="#243b4c" font-size="12">${esc(r.label)}</text><rect x="${labelW}" y="${y}" width="${diW}" height="11" rx="3" fill="#2376a5"><title>DI ${fmt(r.di)} 點</title></rect><rect x="${labelW}" y="${y+15}" width="${aiW}" height="11" rx="3" fill="#f2a93b"><title>AI ${fmt(r.ai)} 點</title></rect>`});
+  return svg+'</svg>';
+}
+
+function rowDetails(row){
+  const included=row.included.map(p=>`<span class="pill">${esc(p.field)}｜${esc(p.label)}</span><div class="muted">${esc(p.calculation)}</div>`).join('');
+  const excluded=row.excluded.length?`<span class="excluded">未計：${esc(row.excluded.join('、'))}</span>`:'—';
+  return `<tr><td><strong>${esc(row.equipment)}</strong><div class="muted">設備數量：${row.quantity===null?'未明':fmt(row.quantity)}</div></td><td class="num">${fmt(row.di)}</td><td class="num">${fmt(row.ai)}</td><td>${included||'沒有納入點位'}</td><td>${excluded}</td></tr>`;
+}
+
+function systemPage(system){
+  const chartRows=system.rows.map(r=>({label:r.equipment,di:r.di,ai:r.ai}));
+  const included=system.rows.filter(r=>r.di>0||r.ai>0).map(r=>r.equipment);
+  const excluded=system.rows.filter(r=>r.di===0&&r.ai===0).map(r=>r.equipment);
+  return `<section class="page" id="${system.id}"><div class="title-row"><div><div class="eyebrow">系統分頁</div><h1>${esc(system.name)}</h1></div><div class="stamp">來源：Excel「${esc(system.name)}」TAB</div></div>
+  <div class="kpis"><div class="kpi di"><span>可使用 DI</span><strong>${fmt(system.di)}</strong></div><div class="kpi ai"><span>可使用 AI</span><strong>${fmt(system.ai)}</strong></div><div class="kpi"><span>DI＋AI</span><strong>${fmt(system.di+system.ai)}</strong></div><div class="kpi"><span>有可用點位的設備類型</span><strong>${included.length}</strong></div></div>
+  <div class="visual-grid"><div class="panel"><div class="panel-head"><h2>設備類型可使用點位</h2><p>只顯示能明確換算點數的 DI 與 AI</p></div><div class="chart-wrap">${chartSvg(chartRows,system.name+'設備類型可使用點位')}</div><div class="legend"><span><i class="key di"></i>DI</span><span><i class="key ai"></i>AI</span></div></div>
+  <aside class="panel method"><h2>這張圖拿什麼計算</h2><dl><div><dt>資料來源</dt><dd>Excel「${esc(system.name)}」TAB 的設備類型、設備數量、DI、通訊DI、AI、通訊AI${system.category==='電力 01'?'、APFR及發電機共用訊號':''}。</dd></div><div><dt>納入設備</dt><dd>${esc(included.join('、')||'無')}</dd></div><div><dt>簡單計算</dt><dd class="formula">DI＝Σ（明確 DI 單台點數 × 設備數量）<br>AI＝Σ（明確 AI 單台點數 × 設備數量）<br>群組總計＝直接採用原列總數</dd></div><div><dt>不納入</dt><dd>DO、AO、待填、泛稱「數值」、非整數、數量範圍與設備數量未明的點位。</dd></div></dl>${excluded.length?`<div class="warning">本頁沒有可計數點位的設備：${esc(excluded.join('、'))}</div>`:''}</aside></div>
+  <div class="panel detail"><div class="panel-head"><h2>設備別計算明細</h2><p>每個數字都列出實際採用的點位與乘算方式</p></div><div class="table-scroll"><table class="data-table"><thead><tr><th>設備類型</th><th>可使用DI</th><th>可使用AI</th><th>納入點位與計算</th><th>排除／備註</th></tr></thead><tbody>${system.rows.map(rowDetails).join('')}</tbody></table></div></div></section>`;
+}
+
+function overviewPage(){
+  const rows=systems.map(s=>({label:s.name,di:s.di,ai:s.ai}));
+  return `<section class="page" id="overview"><div class="title-row"><div><div class="eyebrow">總覽</div><h1>智慧建築可使用 DI／AI 點位</h1></div><div class="stamp">共 16 類系統</div></div>
+  <div class="kpis"><div class="kpi di"><span>可使用 DI</span><strong>${fmt(grand.di)}</strong></div><div class="kpi ai"><span>可使用 AI</span><strong>${fmt(grand.ai)}</strong></div><div class="kpi"><span>DI＋AI</span><strong>${fmt(grand.di+grand.ai)}</strong></div><div class="kpi"><span>系統類別</span><strong>16</strong></div></div>
+  <div class="visual-grid"><div class="panel"><div class="panel-head"><h2>各系統可使用點位</h2><p>依可明確計數的點位加總</p></div><div class="chart-wrap">${chartSvg(rows,'各系統可使用DI與AI點位')}</div><div class="legend"><span><i class="key di"></i>DI</span><span><i class="key ai"></i>AI</span></div></div>
+  <aside class="panel method"><h2>這張圖拿什麼計算</h2><dl><div><dt>來源</dt><dd>16 個系統 TAB 的設備點位清單。</dd></div><div><dt>DI</dt><dd>數位輸入與通訊DI；電力頁另包含可明確計數的 APFR 與發電機共用數位訊號。</dd></div><div><dt>AI</dt><dd>類比輸入與通訊AI。</dd></div><div><dt>簡單計算</dt><dd class="formula">各系統 DI＝該系統設備 DI 加總<br>各系統 AI＝該系統設備 AI 加總</dd></div><div><dt>排除</dt><dd>DO、AO、待填及無法確認單台數量的點位。</dd></div></dl></aside></div>
+  <div class="panel detail"><div class="panel-head"><h2>系統合計</h2><p>點選左側分頁可查看設備別明細</p></div><div class="table-scroll"><table class="data-table"><thead><tr><th>系統TAB</th><th>可使用DI</th><th>可使用AI</th><th>合計</th></tr></thead><tbody>${systems.map(s=>`<tr><td><strong>${esc(s.name)}</strong></td><td class="num">${fmt(s.di)}</td><td class="num">${fmt(s.ai)}</td><td class="num">${fmt(s.di+s.ai)}</td></tr>`).join('')}</tbody></table></div></div></section>`;
+}
+
+const nav=document.getElementById('nav');
+nav.innerHTML=`<button data-page="overview">總覽</button>${systems.map(s=>`<button data-page="${s.id}">${esc(s.name)}</button>`).join('')}`;
+document.getElementById('main').innerHTML=overviewPage()+systems.map(systemPage).join('');
+function showPage(id){if(!document.getElementById(id))id='overview';document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'})}
+nav.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page)});
+window.addEventListener('hashchange',()=>showPage(location.hash.slice(1)));
+showPage(location.hash.slice(1)||'overview');
+</script>
+</body>
+</html>

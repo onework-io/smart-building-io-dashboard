@@ -1,0 +1,7 @@
+{
+  "project_id": "appgprj_6aa4b8dbcb348191a9572d8731f1f93c",
+  "name": "智慧建築 IO Dashboard",
+  "static": {
+    "directory": "dist"
+  }
+}
