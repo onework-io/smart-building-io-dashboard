@@ -17,7 +17,7 @@
     .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(22,57,79,.055)}.kpi{padding:17px 18px;min-height:118px;position:relative;overflow:hidden}.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}.kpi.green:before{background:var(--green)}.kpi.amber:before{background:var(--amber)}.kpi.red:before{background:var(--red)}
     .kpi-label{color:var(--muted);font-size:.85rem}.kpi-value{font-size:1.9rem;font-weight:760;letter-spacing:-.03em;margin:6px 0 2px}.kpi-value small{font-size:.9rem;margin-left:4px;font-weight:600;color:var(--muted)}.kpi-note{font-size:.78rem;color:var(--muted)}
     .work{grid-template-columns:minmax(0,1.55fr) minmax(290px,.75fr);align-items:stretch;margin-bottom:16px}.panel{padding:19px 20px}.panel-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px}.panel h2{font-size:1.05rem;margin:0}.tag{font-size:.73rem;border-radius:999px;background:#eef4f7;color:#587080;padding:4px 8px}
-    .chart{height:245px;display:flex;align-items:stretch}.chart svg{width:100%;height:100%;overflow:visible}.chart text{font-size:11px;fill:#7d8b98}.gridline{stroke:#e5edf2;stroke-width:1}.axisline{stroke:#b9c8d2}.area{fill:url(#areaFill)}.series{fill:none;stroke:var(--cyan);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.series2{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 5}.dot{fill:#fff;stroke:var(--cyan);stroke-width:2}
+    .chart{height:245px;display:flex;align-items:stretch}.chart svg{width:100%;height:100%;overflow:visible}.chart.heat{display:block;height:auto}.chart.heat svg{height:auto}.chart text{font-size:11px;fill:#7d8b98}.gridline{stroke:#e5edf2;stroke-width:1}.axisline{stroke:#b9c8d2}.area{fill:url(#areaFill)}.series{fill:none;stroke:var(--cyan);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.series2{fill:none;stroke:var(--amber);stroke-width:2;stroke-dasharray:5 5}.dot{fill:#fff;stroke:var(--cyan);stroke-width:2}
     .basis{background:#102f41;color:#dcebf3;border-color:#102f41}.basis h2{color:white}.basis .tag{background:#20485f;color:#d7edf7}.basis dl{margin:0;display:grid;gap:14px}.basis dt{font-size:.76rem;letter-spacing:.08em;color:#7fd6e6;font-weight:700}.basis dd{margin:3px 0 0;color:#e8f1f6;font-size:.9rem}.formula{padding:11px 12px;border-radius:9px;background:#173c51;color:white;font-weight:650}
     .lower{grid-template-columns:minmax(0,.95fr) minmax(0,1.25fr)}.status-wrap{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:center}.ring{width:128px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) calc(var(--rate)*1%),#e8eef2 0);position:relative}.ring:after{content:"";position:absolute;inset:13px;border-radius:50%;background:white}.ring div{z-index:1;text-align:center}.ring strong{display:block;font-size:1.55rem}.ring span{font-size:.72rem;color:var(--muted)}
     .status-list{display:grid;gap:8px}.status-row{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:6px;font-size:.88rem}.status-row b.ok{color:var(--green)}.status-row b.bad{color:var(--red)}
@@ -42,13 +42,14 @@ const areaKeys=["電力 01","照明 02","空調 03","消防 04","給排水 05","
 let selectedArea=localStorage.getItem("buildingArea")==="乙區"?"乙區":"甲區";
 const hours=["08:00","10:00","12:00","14:00","16:00","18:00","20:00"];
 const rangeKeys=["today","d7","d30"],rangeNames={today:"今日",d7:"近 7 日",d30:"近 30 日"};
-let hvacRange=rangeKeys.includes(localStorage.getItem("hvacRange"))?localStorage.getItem("hvacRange"):"today";
+let histRange=rangeKeys.includes(localStorage.getItem("histRange"))?localStorage.getItem("histRange"):"today";
 function dayLabels(n){const out=[],now=Date.now();for(let i=n-1;i>=0;i--){const t=new Date(now-i*864e5);out.push((t.getMonth()+1)+"/"+t.getDate())}return out}
 function rangeMeta(){
- if(hvacRange==="d7")return{key:"d7",n:7,bn:7,tick:1,lineLabels:dayLabels(7),barLabels:dayLabels(7),note:"近 7 日 · 每日彙總"};
- if(hvacRange==="d30")return{key:"d30",n:30,bn:5,tick:5,lineLabels:dayLabels(30),barLabels:["W1","W2","W3","W4","W5"],note:"近 30 日 · 線圖每日、長條每週彙總"};
+ if(histRange==="d7")return{key:"d7",n:7,bn:7,tick:1,lineLabels:dayLabels(7),barLabels:dayLabels(7),note:"近 7 日 · 每日彙總"};
+ if(histRange==="d30")return{key:"d30",n:30,bn:5,tick:5,lineLabels:dayLabels(30),barLabels:["W1","W2","W3","W4","W5"],note:"近 30 日 · 線圖每日、長條每週彙總"};
  return{key:"today",n:7,bn:7,tick:1,lineLabels:hours,barLabels:hours,note:"今日 · 每 2 小時"};
 }
+function hasRange(id){return id===3||id===14}
 function sparse(labels,tick){return labels.map((l,i)=>i%tick===0?l:"")}
 // 以固定 seed 產生可重現的示意序列：today 走日間鐘形負載，d7／d30 走週末較低的形狀。
 function seedSeries(seed,n,base,amp,shape){
@@ -59,9 +60,9 @@ function seedSeries(seed,n,base,amp,shape){
  }
  return out;
 }
-function hvacSeries(seed,base,amp,opts){
+function histSeries(seed,base,amp,opts){
  opts=opts||{};const m=rangeMeta(),n=opts.bar?m.bn:m.n,f=selectedArea==="甲區"?1:(opts.f||.97);
- return seedSeries(seed,n,base,amp,opts.shape||(hvacRange==="today"?"day":"week")).map(v=>{
+ return seedSeries(seed,n,base,amp,opts.shape||(histRange==="today"?"day":"week")).map(v=>{
   let x=v*f;if(opts.max!=null)x=Math.min(x,opts.max);x=Math.max(x,opts.min==null?0:opts.min);
   return opts.int?Math.round(x):Math.round(x*10)/10;
  });
@@ -90,8 +91,8 @@ nav.innerHTML='<button data-id="0">總覽 Overview</button>'+systems.map(s=>'<bu
 nav.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;location.hash=b.dataset.id==="0"?"overview":"system-"+b.dataset.id});
 function areaSwitch(extra){return '<div class="top-actions"><div class="area-switch" aria-label="區域切換"><button data-area="甲區" class="'+(selectedArea==="甲區"?"active":"")+'">甲區</button><button data-area="乙區" class="'+(selectedArea==="乙區"?"active":"")+'">乙區</button></div>'+(extra||"")+'</div>'}
 function bindAreaSwitch(){app.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{selectedArea=b.dataset.area;localStorage.setItem("buildingArea",selectedArea);render()})}
-function rangeSwitch(){return '<div class="range-switch" aria-label="時間範圍切換">'+rangeKeys.map(k=>'<button data-range="'+k+'" class="'+(hvacRange===k?"active":"")+'">'+esc(rangeNames[k])+'</button>').join("")+'</div>'}
-function bindRangeSwitch(){app.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{hvacRange=b.dataset.range;localStorage.setItem("hvacRange",hvacRange);render()})}
+function rangeSwitch(){return '<div class="range-switch" aria-label="時間範圍切換">'+rangeKeys.map(k=>'<button data-range="'+k+'" class="'+(histRange===k?"active":"")+'">'+esc(rangeNames[k])+'</button>').join("")+'</div>'}
+function bindRangeSwitch(){app.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{histRange=b.dataset.range;localStorage.setItem("histRange",histRange);render()})}
 function chartScope(id){return [2,4,6].includes(id)?"可分樓層":"整棟合計"}
 function scopePill(scope){return '<span class="scope-pill '+(scope.includes("樓層")?"floor":"whole")+'">'+esc(scope)+'</span>'}
 function lineChart(values,unit,xLabels){
@@ -158,8 +159,8 @@ function bandLine(low,high,labels,unit,names){
  const d=Math.round((high[high.length-1]-low[low.length-1])*10)/10;
  return '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="溫度與溫差圖"><line class="axisline" x1="'+p.l+'" y1="'+(h-p.b)+'" x2="'+(w-p.r)+'" y2="'+(h-p.b)+'"/><polygon class="band-fill" points="'+band+'"/><polyline fill="none" stroke="#087dbb" stroke-width="2.5" points="'+highPts+'"/><polyline fill="none" stroke="#24c3d8" stroke-width="2.5" points="'+lowPts+'"/>'+labels.map((lab,i)=>lab?'<text text-anchor="middle" x="'+x(i)+'" y="'+(h-8)+'">'+esc(lab)+'</text>':"").join("")+'<text x="2" y="11">'+esc(unit)+'</text><text class="val" text-anchor="end" x="'+(w-8)+'" y="11">Δ '+d+esc(unit)+'</text></svg><div class="legend"><span><i style="background:#24c3d8"></i>'+esc(names[0])+'</span><span><i style="background:#087dbb"></i>'+esc(names[1])+'</span></div>';
 }
-function heatmap(rowLabels,colLabels,matrix,unit){
- const w=360,h=155,p={l:60,r:8,t:14,b:20},cw=(w-p.l-p.r)/colLabels.length,rh=(h-p.t-p.b)/rowLabels.length;
+function heatmap(rowLabels,colLabels,matrix,unit,size){
+ const z=size||{},w=z.w||360,h=z.h||155,p={l:z.l||60,r:8,t:14,b:20},cw=(w-p.l-p.r)/colLabels.length,rh=(h-p.t-p.b)/rowLabels.length;
  const flat=matrix.flat(),min=Math.min(...flat),max=Math.max(...flat),stops=[[233,246,250],[36,195,216],[233,166,26],[231,93,87]];
  const col=v=>{const t=Math.max(0,Math.min(1,(v-min)/((max-min)||1)))*(stops.length-1),i=Math.min(Math.floor(t),stops.length-2),k=t-i;return 'rgb('+stops[i].map((c,q)=>Math.round(c+(stops[i+1][q]-c)*k)).join(",")+')'};
  const body=rowLabels.map((rl,i)=>'<text x="2" y="'+(p.t+i*rh+rh*.66)+'">'+esc(rl)+'</text>'+colLabels.map((cl,j)=>'<rect class="hm-cell" x="'+(p.l+j*cw)+'" y="'+(p.t+i*rh)+'" width="'+cw+'" height="'+rh+'" fill="'+col(matrix[i][j])+'"><title>'+esc(rl+" "+(cl||("#"+(j+1)))+"："+matrix[i][j]+unit)+'</title></rect>').join("")).join("");
@@ -199,8 +200,8 @@ function relatedEnergy(id){
  if(id===3){
   const m=rangeMeta();
   cards.push(miniCard("空調電力監控",multiLine([
-   {name:"ACMP-1～4",values:hvacSeries(71,40,40,{int:true,f:.994})},
-   {name:"ACSP 配電盤／分電盤",values:hvacSeries(72,112,82,{int:true,f:.994})}
+   {name:"ACMP-1～4",values:histSeries(71,40,40,{int:true,f:.994})},
+   {name:"ACSP 配電盤／分電盤",values:histSeries(72,112,82,{int:true,f:.994})}
   ],sparse(m.lineLabels,m.tick),"kW"),"ACMP-1、2、3、4 多功能電錶及 ACSP 配電盤／分電盤功率電錶：實功率 kW、用電度數 kWh","空調總功率 = Σ ACMP 實功率 + Σ ACSP 實功率；甲／乙區各依該區空調 IO 的黃色彙總分類，不能依樓層完整拆分。","整棟合計"));
   title="空調用電";
  }
@@ -255,7 +256,7 @@ function otherExtras(){
  return '<section class="subsystem"><div class="subhead"><div><h2>設備別獨立監控</h2><p>每一種設備各自一張圖，不跨設備混合計算。</p></div><span class="tag">12 devices · 12 charts</span></div><div class="grid chart-deck">'+charts+'</div></section>';
 }
 function hvacConfig(){
- const m=rangeMeta(),run=hvacSeries(11,58,30,{int:true,max:99}),supply=hvacSeries(21,6.4,1.1),ret=hvacSeries(22,11.9,1.8),indoor=hvacSeries(23,23.4,1.5),warn=hvacSeries(24,2,5,{int:true});
+ const m=rangeMeta(),run=histSeries(11,58,30,{int:true,max:99}),supply=histSeries(21,6.4,1.1),ret=histSeries(22,11.9,1.8),indoor=histSeries(23,23.4,1.5),warn=histSeries(24,2,5,{int:true});
  // 今日看最新一筆；近 7／30 日看期間平均，警示改為期間累計件數。
  const today=m.key==="today",last=a=>a[a.length-1],mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
  const pick=a=>Math.round((today?last(a):mean(a))*10)/10,runV=Math.round(today?last(run):mean(run));
@@ -268,7 +269,7 @@ function hvacConfig(){
 }
 function hvacExtras(){
  const m=rangeMeta(),L=sparse(m.lineLabels,m.tick),B=m.barLabels,mult=m.key==="today"?1:m.key==="d7"?4:14;
- const bar=(seed,base,amp,max)=>hvacSeries(seed,base,amp,{bar:true,int:true,max:max});
+ const bar=(seed,base,amp,max)=>histSeries(seed,base,amp,{bar:true,int:true,max:max});
  const plant=[
   miniCard("主機群組運轉台數",stackedBars([
    {name:"冰水主機 CHU",values:bar(101,1.5,1.5,3)},{name:"冰水泵浦 CHP",values:bar(102,1.5,1.5,3)},
@@ -281,11 +282,11 @@ function hvacExtras(){
   miniCard("主機系統故障告警分布",bars([1,0,2,0,1].map(v=>v*mult+(mult>1?1:0)),["CHU","CHP","SCHP","CDP","CT"],"件",true),"各群組的故障／跳脫／警報 DI","告警件數 = 該群組故障／跳脫／警報 DI 由 OFF 轉 ON 的次數；CT 因 15 台風扇共用同一類訊號，件數需除以台數才可比較。")
  ].join("");
  const temp=[
-  miniCard("冰水供／回水溫與 ΔT",bandLine(hvacSeries(21,6.4,1.1),hvacSeries(22,11.9,1.8),L,"°C",["冰水供水溫","冰水回水溫"]),"冰水系統水管溫度 AI×12（群組總計）、冰水主機冰機溫度 AI×2","ΔT = 回水溫 − 供水溫。ΔT 長期偏低（低於 4°C）代表冰水流量過大或末端閥件無法關斷，是最常見的輸送能耗浪費。"),
-  miniCard("冷卻水塔逼近溫度",bandLine(hvacSeries(31,26.2,3.2),hvacSeries(32,30.8,3.0),L,"°C",["外氣濕球溫","冷卻水出水溫"]),"冷卻水系統外氣溫度 AI×1、外氣濕度 AI×1、水管溫度 AI×20（群組總計）","逼近溫度 = 冷卻水塔出水溫 − 外氣濕球溫（濕球由外氣溫度與濕度換算）。逼近溫度持續拉大代表水塔填料阻塞或風扇未全數投入。"),
-  miniCard("BTU 冷量：主表 vs 分表",multiLine([{name:"BTU-P 主表 ×7",values:hvacSeries(41,620,520,{int:true})},{name:"BTU-S 分表 ×141 合計",values:hvacSeries(42,560,480,{int:true})}],L,"RTH"),"BTU-P×7 及 BTU-S×141 錶閥組的冰水用量 RTH","主表與分表的差值 = 未被分表覆蓋的冷量（管損與未裝錶區域）。差值長期擴大表示有分表失效或通訊中斷。"),
+  miniCard("冰水供／回水溫與 ΔT",bandLine(histSeries(21,6.4,1.1),histSeries(22,11.9,1.8),L,"°C",["冰水供水溫","冰水回水溫"]),"冰水系統水管溫度 AI×12（群組總計）、冰水主機冰機溫度 AI×2","ΔT = 回水溫 − 供水溫。ΔT 長期偏低（低於 4°C）代表冰水流量過大或末端閥件無法關斷，是最常見的輸送能耗浪費。"),
+  miniCard("冷卻水塔逼近溫度",bandLine(histSeries(31,26.2,3.2),histSeries(32,30.8,3.0),L,"°C",["外氣濕球溫","冷卻水出水溫"]),"冷卻水系統外氣溫度 AI×1、外氣濕度 AI×1、水管溫度 AI×20（群組總計）","逼近溫度 = 冷卻水塔出水溫 − 外氣濕球溫（濕球由外氣溫度與濕度換算）。逼近溫度持續拉大代表水塔填料阻塞或風扇未全數投入。"),
+  miniCard("BTU 冷量：主表 vs 分表",multiLine([{name:"BTU-P 主表 ×7",values:histSeries(41,620,520,{int:true})},{name:"BTU-S 分表 ×141 合計",values:histSeries(42,560,480,{int:true})}],L,"RTH"),"BTU-P×7 及 BTU-S×141 錶閥組的冰水用量 RTH","主表與分表的差值 = 未被分表覆蓋的冷量（管損與未裝錶區域）。差值長期擴大表示有分表失效或通訊中斷。"),
   miniCard("小型冷風機迴風溫度分佈",bars([12,48,126,142,51,12].map(v=>Math.round(v*(selectedArea==="甲區"?1:.97))),["<20","20-22","22-24","24-26","26-28",">28"],"台",false),"小型冷風機×391 的迴風溫度 AI，並以運轉狀態 DI 篩選運轉中的機組","只統計運轉狀態 DI 為 ON 的機組；分箱寬度 2°C。右尾（>28°C）代表該區冷量不足或風機空轉，左尾代表過度供冷。"),
-  miniCard("室內溫度達標率",miniLine(hvacSeries(51,86,12,{int:true,max:100}),L,"%"),"外氣預冷空調箱 PAH×98 及空調箱 AHU×24 的室內溫度 AI","達標率 = 室內溫度 AI 落在 23～26°C 的量測點數 ÷ 有效量測點數 × 100%；通訊異常與空值不列入分母。"),
+  miniCard("室內溫度達標率",miniLine(histSeries(51,86,12,{int:true,max:100}),L,"%"),"外氣預冷空調箱 PAH×98 及空調箱 AHU×24 的室內溫度 AI","達標率 = 室內溫度 AI 落在 23～26°C 的量測點數 ÷ 有效量測點數 × 100%；通訊異常與空值不列入分母。"),
   miniCard("空調箱設定溫度偏差",hbars([["PAH-B2-07",3.4],["AHU-5F-02",2.9],["PAH-3F-11",2.1],["AHU-7F-01",1.8],["PAH-1F-04",1.2],["PAH-9F-06",.7]]," °C",true),"PAH／AHU 的室內溫度 AI 與外氣溫度 AI","偏差 = |室內溫度 AI − 設定值|，取偏差最大的前 6 台。偏差長期偏大的機組優先排查閥件與風門。")
  ].join("");
  const air=[
@@ -298,7 +299,7 @@ function hvacExtras(){
   miniCard("空氣品質偵測器",'<div class="empty">IO 表為 0 台／組，8 項 AI 為預留點位</div>',"溫度、濕度、CO₂、PM2.5、PM10、TVOC、CO、甲醛 HCHO AI","設備數量尚未確定，待現場佈點確認後才能計算分區空品指數；目前空品判讀以 PAH／AHU 的 CO₂ AI 為準。")
  ].join("");
  const parking=[
-  miniCard("停車場 CO 濃度與風機連動",multiLine([{name:"CO 濃度",values:hvacSeries(61,9,16)},{name:"啟動風機台數",values:hvacSeries(62,12,26,{int:true})}],L,"ppm ／ 台"),"誘導風機×48 的一氧化碳 AI（樓層共用）、EAF×9／SAF×9／送排氣風機×117 的狀態 DI","兩序列共用同一軸以觀察連動：CO 上升後風機台數應隨即增加。若 CO 已升高但台數未動，代表連動控制或 CO 感測失效。"),
+  miniCard("停車場 CO 濃度與風機連動",multiLine([{name:"CO 濃度",values:histSeries(61,9,16)},{name:"啟動風機台數",values:histSeries(62,12,26,{int:true})}],L,"ppm ／ 台"),"誘導風機×48 的一氧化碳 AI（樓層共用）、EAF×9／SAF×9／送排氣風機×117 的狀態 DI","兩序列共用同一軸以觀察連動：CO 上升後風機台數應隨即增加。若 CO 已升高但台數未動，代表連動控制或 CO 感測失效。"),
   miniCard("停車場風機群組運轉率",bars([88,92,79,84],["EAF 9","SAF 9","誘導 48","送排氣 117"],"%",false),"EAF×9、SAF×9、誘導風機×48、送排氣風機×117 的狀態 DI 與故障／跳脫 DI","群組運轉率 = 狀態 DI 為 ON 的台數 ÷ 該群組納管台數 × 100%；故障台數由分母排除，避免把故障機當成可調度容量。")
  ].join("");
  const sec=(title,desc,tag,cards,foot)=>'<section class="subsystem"><div class="subhead"><div><h2>'+esc(title)+'</h2><p>'+esc(desc)+'</p></div><span class="tag">'+esc(tag)+'</span></div><div class="grid chart-deck">'+cards+'</div>'+(foot?'<p class="footnote">'+esc(foot)+'</p>':"")+'</section>';
@@ -307,20 +308,53 @@ function hvacExtras(){
   +sec("空氣側、空品與維護","PAH／AHU 的濾網、CO₂ 與狀態告警。","4 charts · "+m.note,air)
   +sec("停車場通風","CO 濃度與送排風機的連動與可用率。","2 charts · "+m.note,parking,"空調全系統沒有可用的樓層欄位，所有圖表均為整棟或分區合計；歷史區間的數值為示意序列，串接 BMS 後以實際歷史資料替換。");
 }
+function elevatorConfig(){
+ const m=rangeMeta(),avail=histSeries(81,88,10,{max:99.5}),running=histSeries(82,30,22,{int:true,max:61}),fault=histSeries(83,1,3,{int:true}),kw=histSeries(84,140,120,{int:true});
+ const today=m.key==="today",last=a=>a[a.length-1],mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+ const pick=a=>Math.round((today?last(a):mean(a))*10)/10,rate=Math.round(today?last(avail):mean(avail));
+ return{
+  k:[[today?"電梯可用率":"平均可用率",pick(avail),"%","狀態／故障 DI"],[today?"運轉中":"平均運轉中",Math.round(today?last(running):mean(running)),"台","狀態 DI"],[today?"故障停機":"期間累計故障",today?last(fault):fault.reduce((x,y)=>x+y,0),today?"台":"件","故障 DI"],[today?"即時用電":"期間平均用電",Math.round(today?last(kw):mean(kw)),"kW","回電電表有效功率"]],
+  chart:["電梯用電趨勢","kW",kw,"回電電表有效功率 kW、狀態 DI","每時用電 = Σ 電梯回電電表有效功率 kW",sparse(m.lineLabels,m.tick)],
+  rate:rate,status:["可用","故障","通訊異常"],counts:[74,3,0]
+ };
+}
+function elevatorExtras(){
+ const m=rangeMeta(),days=m.key==="today"?1:m.key==="d7"?7:30,f=selectedArea==="甲區"?1:.96;
+ const slots=["06:00","08:00","10:00","12:00","14:00","16:00","18:00","20:00","22:00"];
+ // 樓層權重：1F 為主要出入口，B1／B2 為停車層，其餘依進駐人數遞減。
+ const floors=[["1F",1],["B2F",.62],["B1F",.57],["2F",.41],["3F",.36],["5F",.33],["6F",.30],["8F",.28],["9F",.26],["11F",.23],["14F",.20],["16F",.17]];
+ // 時段權重：上班、午休、下班三個尖峰。
+ const peak=[.22,1,.44,.86,.38,.48,.94,.28,.10],jit=(i,j)=>((i*37+j*91)%15)-7;
+ const rows=floors.map(([name,w],i)=>{
+  const cells=peak.map((p,j)=>Math.max(0,Math.round(260*w*p*days*(1+jit(i,j)/100)*f)));
+  return{name:name,cells:cells,total:cells.reduce((a,b)=>a+b,0)};
+ }).sort((a,b)=>b.total-a.total);
+ const visual=heatmap(rows.map(r=>r.name+" · "+r.total.toLocaleString("zh-TW")),slots,rows.map(r=>r.cells),"次",{w:760,h:340,l:92});
+ const top=rows.slice(0,3).map(r=>r.name).join("、");
+ return '<section class="subsystem"><div class="subhead"><div><h2>樓層停靠熱區</h2><p>由樓層 AI 還原的停靠次數，縱軸依該樓層總停靠次數由高至低排序。</p></div><span class="tag">'+esc(m.note)+'</span></div>'
+  +'<section class="grid work"><article class="card panel"><div class="panel-head"><h2>各樓層停靠次數（樓層 × 時段）</h2><div>'+scopePill("整棟合計")+' <span class="tag">'+esc(rangeNames[histRange])+'累計 · 示意</span></div></div><div class="chart heat">'+visual+'</div></article>'
+  +'<aside class="card panel basis"><div class="panel-head"><h2>計算依據</h2><span class="tag">DI / AI</span></div><dl>'
+  +'<div><dt>使用的訊號</dt><dd>電梯／手扶梯 77 台的樓層 AI、狀態 DI×1／3、故障 DI</dd></div>'
+  +'<div><dt>停靠事件如何認定</dt><dd class="formula">樓層 AI 連續數筆維持同值，且該時段狀態 DI 為停止／開門 → 計為該樓層一次停靠</dd></div>'
+  +'<div><dt>每格數值</dt><dd>該樓層在該時段的停靠次數，於選定區間內累加；目前為'+esc(rangeNames[histRange])+'共 '+days+' 天。橫軸固定為一天中的時段，切換區間只改變累積天數。</dd></div>'
+  +'<div><dt>資料前提</dt><dd>樓層 AI 是轎廂即時位置，不是停靠次數，因此需要 BMS 保留其連續歷史紀錄；若只儲存變化量，須改以樓層值的變化邊緣推算停靠。</dd></div>'
+  +'</dl></aside></section>'
+  +'<p class="footnote">停靠最頻繁的樓層為 '+esc(top)+'；可用於設定電梯待機樓層與分區服務範圍。故障 DI 為 ON 的機組不列入統計，避免把停機誤判為長時間停靠。</p></section>';
+}
 function sourceLinks(){
  return '<section class="card sources" aria-labelledby="source-title"><h2 id="source-title">資料來源</h2><div class="source-links"><a class="source-link" href="https://docs.google.com/spreadsheets/d/1uSfL-y2MgPgxlezYr6Kq_m7cm0j-b_AB/edit?usp=drive_link" target="_blank" rel="noopener noreferrer"><strong>智慧建築 IO 分類完整清單</strong><span>系統分類、設備類型與整理後點位的依據 ↗</span></a><a class="source-link" href="https://docs.google.com/spreadsheets/d/1FqHO-Op6UDNEEXhBSEegvap55jvbF0vK/edit?usp=drive_link" target="_blank" rel="noopener noreferrer"><strong>雲宇宙智慧監控系統 IO 表</strong><span>原始 IO 點位、設備數量及甲／乙區資料的依據 ↗</span></a></div></section>';
 }
 function overview(){
  document.title="智慧建築營運 Dashboard｜總覽";
- const cards=systems.map((s,i)=>{const c=s.id===3?hvacConfig():configs[i],alarm=c.counts[2],qty=areaTotal(s.id);return '<article class="card sys" data-go="'+s.id+'" tabindex="0"><div class="sys-head"><h3>'+esc(s.name)+'</h3><span class="tag">'+esc(selectedArea)+'</span></div><div class="sys-rate">'+c.rate+'%</div><div class="bar"><i style="width:'+c.rate+'%"></i></div><div class="sys-foot"><span>納管設備 '+qty.toLocaleString("zh-TW")+'</span><span>異常 '+alarm+'（示意）</span></div></article>'}).join("");
+ const cards=systems.map((s,i)=>{const c=s.id===3?hvacConfig():s.id===14?elevatorConfig():configs[i],alarm=c.counts[2],qty=areaTotal(s.id);return '<article class="card sys" data-go="'+s.id+'" tabindex="0"><div class="sys-head"><h3>'+esc(s.name)+'</h3><span class="tag">'+esc(selectedArea)+'</span></div><div class="sys-rate">'+c.rate+'%</div><div class="bar"><i style="width:'+c.rate+'%"></i></div><div class="sys-foot"><span>納管設備 '+qty.toLocaleString("zh-TW")+'</span><span>異常 '+alarm+'（示意）</span></div></article>'}).join("");
  app.innerHTML='<header class="top"><div><div class="eyebrow">OPERATIONS OVERVIEW</div><h1>智慧建築營運總覽</h1><p>用可使用的 DI 狀態與 AI 量測值，快速看運轉、異常與趨勢。</p></div>'+areaSwitch()+'</header><div class="notice"><b>資料說明</b><span>目前選擇 '+esc(selectedArea)+'。納管設備數依 IO 表；運轉、異常與用量為示意，正式串接 BMS 後替換成實際值。</span></div><section class="overview">'+cards+'</section>'+sourceLinks()+'<p class="footnote">點選任一系統卡進入分頁；每張圖旁均列出使用訊號與計算方式。</p>';
  bindAreaSwitch();
  app.querySelectorAll("[data-go]").forEach(el=>{const go=()=>location.hash="system-"+el.dataset.go;el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter")go()}});
 }
 function systemPage(id){
- const s=systems[id-1];if(!s)return overview();const c=id===3?hvacConfig():configs[id-1];document.title="3DFM分析修正｜"+s.short+"可分析項目";
+ const s=systems[id-1];if(!s)return overview();const c=id===3?hvacConfig():id===14?elevatorConfig():configs[id-1];document.title="3DFM分析修正｜"+s.short+"可分析項目";
  const kpis=c.k.map(kpiCard).join(""),qty=areaTotal(id),both=areaData[areaKeys[id-1]],ratio=qty/Math.max(1,both["甲區"]+both["乙區"]),counts=c.counts.map(v=>Math.round(v*ratio*2)),total=counts.reduce((a,b)=>a+b,0),areaRate=total?Math.round(counts[0]/total*100):0,scopeNote=id===5?selectedArea+' IO 表納管設備 '+qty.toLocaleString("zh-TW")+' 台／組；另含集中式污廢水設備 68 台／組':selectedArea+' IO 表納管設備 '+qty.toLocaleString("zh-TW")+' 台／組';
- app.innerHTML='<header class="top"><div><div class="eyebrow">SYSTEM '+String(id).padStart(2,"0")+'</div><h1>'+esc(s.short)+'可分析項目</h1><p>依本系統可使用的 DI 與 AI，呈現實際可落地的營運指標。</p></div>'+areaSwitch(id===3?rangeSwitch():"")+'</header><section class="grid kpis">'+kpis+'</section><section class="grid work"><article class="card panel"><div class="panel-head"><h2>'+esc(c.chart[0])+'</h2><div>'+scopePill(chartScope(id))+' <span class="tag">'+esc(id===3?rangeMeta().note+" · 示意":"今日 · 示意")+'</span></div></div><div class="chart">'+lineChart(c.chart[2],c.chart[1],c.chart[5])+'</div></article><aside class="card panel basis"><div class="panel-head"><h2>計算依據</h2><span class="tag">DI / AI</span></div><dl><div><dt>使用的訊號</dt><dd>'+esc(c.chart[3])+'</dd></div><div><dt>簡單算法</dt><dd class="formula">'+esc(c.chart[4])+'</dd></div><div><dt>資料品質</dt><dd>排除通訊故障、空值及超出合理範圍的讀值；沒有歷史資料時不顯示趨勢。</dd></div></dl></aside></section><section class="grid lower"><article class="card panel"><div class="panel-head"><h2>即時狀態分布</h2>'+scopePill("整區合計")+'</div><div class="status-wrap"><div class="ring" style="--rate:'+areaRate+'"><div><strong>'+areaRate+'%</strong><span>正常／可用率</span></div></div><div class="status-list">'+c.status.map((x,i)=>'<div class="status-row"><span>'+esc(x)+'</span><b class="'+(i===0?"ok":"bad")+'">'+counts[i]+'</b></div>').join("")+'<div class="formula">正常率 = '+counts[0]+' ÷ '+Math.max(total,1)+' × 100%</div></div></div></article><article class="card panel"><div class="panel-head"><h2>可使用的原始訊號</h2><span class="tag">全案設備類型</span></div><div class="equipment">'+equipmentRows(s)+'</div></article></section>'+relatedEnergy(id)+(id===1?powerExtras():"")+(id===3?hvacExtras():"")+(id===5?wastewaterExtras():"")+'<section class="system-meta"><div class="scopebar"><div><strong>'+esc(scopeNote)+'</strong><br><span>切換甲／乙區後，納管設備數與分區圖表會同步更新。</span></div>'+scopePill(chartScope(id))+'</div><div class="notice"><b>資料層級</b><span>只有照明、消防、水錶、排煙風機與插座具備可用的樓層欄位；其他圖表均標示為整棟或整區合計。</span></div></section><p class="footnote">納管設備數與樓層歸屬來自 IO 表。所有運轉、告警與用量數值均為介面示意，不代表目前現場狀況。</p>';
+ app.innerHTML='<header class="top"><div><div class="eyebrow">SYSTEM '+String(id).padStart(2,"0")+'</div><h1>'+esc(s.short)+'可分析項目</h1><p>依本系統可使用的 DI 與 AI，呈現實際可落地的營運指標。</p></div>'+areaSwitch(hasRange(id)?rangeSwitch():"")+'</header><section class="grid kpis">'+kpis+'</section><section class="grid work"><article class="card panel"><div class="panel-head"><h2>'+esc(c.chart[0])+'</h2><div>'+scopePill(chartScope(id))+' <span class="tag">'+esc(hasRange(id)?rangeMeta().note+" · 示意":"今日 · 示意")+'</span></div></div><div class="chart">'+lineChart(c.chart[2],c.chart[1],c.chart[5])+'</div></article><aside class="card panel basis"><div class="panel-head"><h2>計算依據</h2><span class="tag">DI / AI</span></div><dl><div><dt>使用的訊號</dt><dd>'+esc(c.chart[3])+'</dd></div><div><dt>簡單算法</dt><dd class="formula">'+esc(c.chart[4])+'</dd></div><div><dt>資料品質</dt><dd>排除通訊故障、空值及超出合理範圍的讀值；沒有歷史資料時不顯示趨勢。</dd></div></dl></aside></section><section class="grid lower"><article class="card panel"><div class="panel-head"><h2>即時狀態分布</h2>'+scopePill("整區合計")+'</div><div class="status-wrap"><div class="ring" style="--rate:'+areaRate+'"><div><strong>'+areaRate+'%</strong><span>正常／可用率</span></div></div><div class="status-list">'+c.status.map((x,i)=>'<div class="status-row"><span>'+esc(x)+'</span><b class="'+(i===0?"ok":"bad")+'">'+counts[i]+'</b></div>').join("")+'<div class="formula">正常率 = '+counts[0]+' ÷ '+Math.max(total,1)+' × 100%</div></div></div></article><article class="card panel"><div class="panel-head"><h2>可使用的原始訊號</h2><span class="tag">全案設備類型</span></div><div class="equipment">'+equipmentRows(s)+'</div></article></section>'+relatedEnergy(id)+(id===1?powerExtras():"")+(id===3?hvacExtras():"")+(id===14?elevatorExtras():"")+(id===5?wastewaterExtras():"")+'<section class="system-meta"><div class="scopebar"><div><strong>'+esc(scopeNote)+'</strong><br><span>切換甲／乙區後，納管設備數與分區圖表會同步更新。</span></div>'+scopePill(chartScope(id))+'</div><div class="notice"><b>資料層級</b><span>只有照明、消防、水錶、排煙風機與插座具備可用的樓層欄位；其他圖表均標示為整棟或整區合計。</span></div></section><p class="footnote">納管設備數與樓層歸屬來自 IO 表。所有運轉、告警與用量數值均為介面示意，不代表目前現場狀況。</p>';
  if(id===16){app.querySelector(".work").remove();app.querySelector(".lower").remove();app.querySelector(".system-meta").insertAdjacentHTML("beforebegin",otherExtras())}
  bindAreaSwitch();bindRangeSwitch();
 }
