@@ -94,7 +94,7 @@ function areaSwitch(extra){return '<div class="top-actions"><div class="area-swi
 function bindAreaSwitch(){app.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{selectedArea=b.dataset.area;localStorage.setItem("buildingArea",selectedArea);render()})}
 function rangeSwitch(){return '<div class="range-switch" aria-label="時間範圍切換">'+rangeKeys.map(k=>'<button data-range="'+k+'" class="'+(histRange===k?"active":"")+'">'+esc(rangeNames[k])+'</button>').join("")+'</div>'}
 function bindRangeSwitch(){app.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{histRange=b.dataset.range;localStorage.setItem("histRange",histRange);render()})}
-function hideRate(id){return id===4}
+function hideRate(id){return id===4||id===5}
 function chartScope(id){return [2,4,6].includes(id)?"可分樓層":"整棟合計"}
 function scopePill(scope){return '<span class="scope-pill '+(scope.includes("樓層")?"floor":"whole")+'">'+esc(scope)+'</span>'}
 function lineChart(values,unit,xLabels){
