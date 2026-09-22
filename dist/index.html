@@ -245,9 +245,12 @@ function powerExtras(){
  const ups=[
   miniCard("UPS 有效功率趨勢",miniLine([42,51,56,62,59,64,61],hours,"kW"),"有效功率 kW、UPS failed（UPS 故障）","UPS 總功率 = Σ 無故障且通訊正常 UPS 的有效功率 kW。"),
   miniCard("UPS 溫度比較",bars([31.2,32.6,30.8,33.1],["UPS-01","UPS-02","UPS-03","UPS-04"],"°C",false),"溫度 AI、通訊狀態（故障）","平均溫度 = Σ 有效溫度 ÷ 上線 UPS 台數；離線讀值排除。"),
-  miniCard("UPS 狀態與告警",bars([0,0,3,1,0,1,0],["關機","測試","在線","故障","旁路","低電","市電故障"],"台",false),"S01 Shutdown active、S02 Test in process、S03 UPS type、S04 UPS failed、S05 Bypass/Boost active、S06 Battery low、S07 Utility fail","各狀態台數 = 對應 DI 為 1 的 UPS 台數；S03 依 0=on line、1=standby 解碼。")
+  miniCard("UPS 狀態與告警",bars([0,0,3,1,0,1,0],["關機","測試","在線","故障","旁路","低電","市電故障"],"台",false),"S01 Shutdown active、S02 Test in process、S03 UPS type、S04 UPS failed、S05 Bypass/Boost active、S06 Battery low、S07 Utility fail","各狀態台數 = 對應 DI 為 1 的 UPS 台數；S03 依 0=on line、1=standby 解碼。"),
+  miniCard("UPS 輸出負載",bars([42,58,35,71],["UPS-01","UPS-02","UPS-03","UPS-04"],"%",false),"輸出負載百分比","各台直接顯示讀值。持續高於 80% 代表餘裕不足，停電時的支撐時間會明顯縮短。"),
+  miniCard("UPS 預估支撐時間",bars([38,26,45,19],["UPS-01","UPS-02","UPS-03","UPS-04"],"分",false),"預估續航時間、100% 負載續航時間、50% 負載續航時間","預估支撐時間直接取機上讀值；滿載與半載續航時間作為對照，三者落差變大代表電池老化。"),
+  miniCard("UPS 電池電壓",bars([272.4,271.8,273.1,268.6],["UPS-01","UPS-02","UPS-03","UPS-04"],"V",false),"電池電壓、電池單體電壓、電量百分比","圖示電池總電壓。單體電壓比總電壓更早看得出老化——總電壓是整串的和，單顆衰退會被其他顆補掉；電量百分比用來判斷是否仍在充電。")
  ].join("");
- return '<section class="subsystem"><div class="subhead"><div><h2>發電機專屬監控</h2><p>4 台發電機的電力品質、輸出與告警。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+generator+'</div><p class="footnote">IO 表列為發電機的設備共 6 台，其中甲乙區各一台身上只有液位開關、漏液警報與溫度，實為油位箱，沒有功率、電壓與告警點位，因此不列入本節的 4 台。</p></section><section class="subsystem"><div class="subhead"><div><h2>UPS 專屬監控</h2><p>4 台 UPS 的負載、溫度與 S01～S07 狀態。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+ups+'</div><p class="footnote">UPS 原表的「數值 × 7」已於點位目錄具名：輸出負載百分比、預估續航時間、100% 與 50% 負載續航時間、電池電壓、電池單體電壓、電量百分比。資料中台已經取得這七項，可再增加對應圖表。</p></section>';
+ return '<section class="subsystem"><div class="subhead"><div><h2>發電機專屬監控</h2><p>4 台發電機的電力品質、輸出與告警。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+generator+'</div><p class="footnote">IO 表列為發電機的設備共 6 台，其中甲乙區各一台身上只有液位開關、漏液警報與溫度，實為油位箱，沒有功率、電壓與告警點位，因此不列入本節的 4 台。</p></section><section class="subsystem"><div class="subhead"><div><h2>UPS 專屬監控</h2><p>4 台 UPS 的負載、溫度、電池與 S01～S07 狀態。</p></div><span class="tag">6 charts · DI / AI</span></div><div class="grid chart-deck">'+ups+'</div><p class="footnote">本節後三張圖來自原表的「數值 × 7」——那七個點已於點位目錄具名（輸出負載百分比、預估續航時間、100% 與 50% 負載續航時間、電池電壓、電池單體電壓、電量百分比），資料中台已經全部取得。</p></section>';
 }
 function wastewaterExtras(){
  const charts=[
