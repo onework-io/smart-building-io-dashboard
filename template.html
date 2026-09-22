@@ -123,7 +123,7 @@ function bars(values,labels,unit,alert){
  return '<svg class="bar-svg" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="示意長條圖"><line class="axisline" x1="'+p.l+'" y1="'+(h-p.b)+'" x2="'+(w-p.r)+'" y2="'+(h-p.b)+'"/>'+values.map((v,i)=>{const slot=(w-p.l-p.r)/values.length,bh=(h-p.t-p.b)*v/max,x=p.l+i*slot+(slot-bw)/2,y=h-p.b-bh;return '<rect class="'+(alert&&v?"bar-alert":"bar-main")+'" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="3"/><text text-anchor="middle" x="'+(x+bw/2)+'" y="'+(y-4)+'">'+v+'</text><text text-anchor="middle" x="'+(x+bw/2)+'" y="'+(h-18)+'">'+esc(labels[i])+'</text>'}).join("")+'<text x="2" y="12">'+esc(unit)+'</text></svg>';
 }
 function phaseBars(){
- const labels=["G01","G02","G03","G04","G05","G06"],series=[[381,380,382,379,381,380],[379,381,380,380,382,381],[380,379,381,381,380,379]],colors=["#24c3d8","#087dbb","#e9a61a"],w=360,h=155,p={l:30,r:8,t:15,b:32},min=370,max=390,slot=(w-p.l-p.r)/labels.length,bw=slot*.2;
+ const labels=["G01","G02","G03","G04"],series=[[381,380,382,379],[379,381,380,380],[380,379,381,381]],colors=["#24c3d8","#087dbb","#e9a61a"],w=360,h=155,p={l:30,r:8,t:15,b:32},min=370,max=390,slot=(w-p.l-p.r)/labels.length,bw=slot*.2;
  return '<svg class="bar-svg" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="三相電壓比較示意圖"><line class="axisline" x1="'+p.l+'" y1="'+(h-p.b)+'" x2="'+(w-p.r)+'" y2="'+(h-p.b)+'"/>'+labels.map((lab,i)=>series.map((s,j)=>{const v=s[i],bh=(h-p.t-p.b)*(v-min)/(max-min),x=p.l+i*slot+slot*.17+j*bw,y=h-p.b-bh;return '<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+bh+'" rx="2" fill="'+colors[j]+'"/>'}).join("")+'<text text-anchor="middle" x="'+(p.l+i*slot+slot/2)+'" y="'+(h-10)+'">'+lab+'</text>').join("")+'<text x="2" y="12">V</text></svg><div class="legend"><span><i style="background:#24c3d8"></i>L1-L2</span><span><i style="background:#087dbb"></i>L2-L3</span><span><i style="background:#e9a61a"></i>L1-L3</span></div>';
 }
 const deckColors=["#24c3d8","#087dbb","#18a875","#e9a61a","#7c6bd6"];
@@ -239,7 +239,7 @@ function powerAddons(){
 function powerExtras(){
  const generator=[
   miniCard("發電機輸出功率",miniLine([0,420,785,1030,910,640,310],hours,"kW"),"Real Power（有效功率）、RUNNING（機組運轉）","總輸出功率 = Σ 運轉中發電機 Real Power；未運轉機組不納入。","整棟合計","資料中台實作差異：全部機組的功率都加，不挑運轉中的；運轉台數與併聯台數另外回報。"),
-  miniCard("發電機三相電壓平衡",phaseBars(),"Voltage L1-L2／L2-L3／L1-L3（相間電壓）","電壓不平衡值 = 三相最高電壓 − 三相最低電壓；依 G01～G06 分別比較。"),
+  miniCard("發電機三相電壓平衡",phaseBars(),"Voltage L1-L2／L2-L3／L1-L3（相間電壓）","電壓不平衡值 = 三相最高電壓 − 三相最低電壓；依 G01～G04 分別比較。"),
   miniCard("發電機告警分布",bars([0,0,1,0,0,0,1,0],["高水溫","低油壓","過載","過壓","超速","低頻","過流","電瓶"],"件",true),"HIGH COOLANT TEMPERATURE、LOW OIL PRESSURE、OVERLOAD、OVERVOLTAGE、OVERSPEED、UNDERFREQUENCY、OVERCURRENT、BATTERY ALARM","告警件數 = 各警報 DI 為 ON 的機組數；共用 ATS／急停／測試訊號另作系統狀態判斷。")
  ].join("");
  const ups=[
@@ -247,7 +247,7 @@ function powerExtras(){
   miniCard("UPS 溫度比較",bars([31.2,32.6,30.8,33.1],["UPS-01","UPS-02","UPS-03","UPS-04"],"°C",false),"溫度 AI、通訊狀態（故障）","平均溫度 = Σ 有效溫度 ÷ 上線 UPS 台數；離線讀值排除。"),
   miniCard("UPS 狀態與告警",bars([0,0,3,1,0,1,0],["關機","測試","在線","故障","旁路","低電","市電故障"],"台",false),"S01 Shutdown active、S02 Test in process、S03 UPS type、S04 UPS failed、S05 Bypass/Boost active、S06 Battery low、S07 Utility fail","各狀態台數 = 對應 DI 為 1 的 UPS 台數；S03 依 0=on line、1=standby 解碼。")
  ].join("");
- return '<section class="subsystem"><div class="subhead"><div><h2>發電機專屬監控</h2><p>6 台發電機的電力品質、輸出與告警。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+generator+'</div></section><section class="subsystem"><div class="subhead"><div><h2>UPS 專屬監控</h2><p>4 台 UPS 的負載、溫度與 S01～S07 狀態。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+ups+'</div><p class="footnote">UPS 原表另有「數值 × 7」，但名稱尚未確定，因此不放入計算；待補齊名稱後才能新增對應圖表。</p></section>';
+ return '<section class="subsystem"><div class="subhead"><div><h2>發電機專屬監控</h2><p>4 台發電機的電力品質、輸出與告警。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+generator+'</div><p class="footnote">IO 表列為發電機的設備共 6 台，其中甲乙區各一台身上只有液位開關、漏液警報與溫度，實為油位箱，沒有功率、電壓與告警點位，因此不列入本節的 4 台。</p></section><section class="subsystem"><div class="subhead"><div><h2>UPS 專屬監控</h2><p>4 台 UPS 的負載、溫度與 S01～S07 狀態。</p></div><span class="tag">3 charts · DI / AI</span></div><div class="grid chart-deck">'+ups+'</div><p class="footnote">UPS 原表的「數值 × 7」已於點位目錄具名：輸出負載百分比、預估續航時間、100% 與 50% 負載續航時間、電池電壓、電池單體電壓、電量百分比。資料中台已經取得這七項，可再增加對應圖表。</p></section>';
 }
 function wastewaterExtras(){
  const charts=[
