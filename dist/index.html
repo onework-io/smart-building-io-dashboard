@@ -232,9 +232,9 @@ function powerAddons(){
   ["依用途拆解與設備用電排名","依 IO 表子項（照明／插座／動力／消防／給排水）分組加總，與依樓層那支同一套累積量相減規則；不指定用途時排除總盤，避免整棟的量與各層分錶重複計算。",
    ""]
  ];
- return '<section class="subsystem"><div class="subhead"><div><h2>資料中台額外提供</h2><p>本頁未涵蓋、但 onework-data-center 已經實作的電力分析。此處只列公式，不繪示意圖；每一項都標出還需要哪些設定值。</p></div><span class="tag">實作現況 · 2026-09-22</span></div>'
+ return '<section class="subsystem"><div class="subhead"><div><h2>資料中台可提供的分析</h2><p>本頁未涵蓋、但 onework-data-center 做得出來的電力分析。以下是可選項目，不一定全部都要上；每一項列出公式與需要的設定值，此處不繪示意圖。</p></div><span class="tag">7 項 · 可選</span></div>'
   +'<article class="card panel addon"><dl>'+rows.map(r=>'<div><dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd>'+(r[2]?'<dd class="need"><b>需要的設定值：</b>'+esc(r[2])+'</dd>':"")+'</div>').join("")+'</dl></article>'
-  +'<p class="footnote">端點會動不代表數字可以引用——標了設定值的項目要先拿到那些數字。以上是資料中台目前的實作，不是本案的需求項目。</p></section>';
+  +'<p class="footnote">以上為可選項目，不是本案的需求項目，要納入哪幾項另行決定。標了設定值的項目，要先拿到那些數字才能用。</p></section>';
 }
 function powerExtras(){
  const generator=[
