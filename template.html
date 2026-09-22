@@ -257,12 +257,9 @@ function wastewaterExtras(){
  const charts=[
   miniCard("餐廳／製程廢水設備狀態",bars([22,4,1],["運轉","停止","過載"],"台",true),"運轉 DI（0X4050～0X4075）、過載 DI（0X4076～0X4101）","運轉台數 = 運轉 DI 為 ON 的設備數；停止台數 = 設備總數 − 運轉台數；過載獨立計數。資料來源：污廢水點位資料.pdf 第1～2頁。","共用處理廠"),
   miniCard("餐廳／製程廢水池槽液位",bars([0,0,0,1,0],["調節H","調節HH","污泥H","放流H","放流HH"],"ON",true),"調節槽 H／HH、污泥貯留池 H、放流池 H／HH DI（0X4102～0X4106）","每個液位 DI 為 ON 顯示 1；HH 優先列為高高液位警報。資料來源：污廢水點位資料.pdf 第2頁。","共用處理廠"),
-  miniCard("放流水 pH 趨勢",miniLine([7.2,7.1,7.0,7.3,7.2,7.1,7.2],hours,"pH"),"pH值 AI（PLC D301／4X4398／FLOATING）","直接繪製有效 pH 讀值；空值或通訊異常時不連線。資料來源：污廢水點位資料.pdf 第2頁。","共用處理廠"),
-  miniCard("中水回收設備狀態",bars([24,6,1,4],["運轉","停止","過載","閥開啟"],"台／只",true),"運轉及閥開啟 DI（0X4050～0X4079）、過載 DI（0X4080～0X4103）","運轉、停止與過載依各設備 DI 計數；閥開啟數由6只電動閥的開啟 DI 加總。資料來源：污廢水點位資料.pdf 第3～4頁。","共用處理廠"),
-  miniCard("中水回收與放流瞬時流量",multiLine([{name:"中水回收",values:[18,24,31,29,35,33,27]},{name:"放流",values:[12,16,21,19,23,22,18]}],hours,"m³/h"),"中水回收瞬時流量 AI（4X4340）、放流瞬時流量 AI（4X4344）","瞬時流量直接比較；今日累積量另以目前累積流量 − 00:00 累積流量計算。資料來源：污廢水點位資料.pdf 第4頁。","共用處理廠"),
-  miniCard("中水回收控制盤當日用電",miniLine([0,18,43,69,91,116,138],hours,"kWh"),"電能 AI（4X4352）、電壓 AI（4X4346）、電流 AI（4X4348）、頻率 AI（4X4350）","當日用電 = 目前電能 kWh − 00:00 電能 kWh；電壓、電流及頻率用於判斷讀值是否有效。資料來源：污廢水點位資料.pdf 第4頁。","共用處理廠")
+  miniCard("中水回收設備狀態",bars([24,6,1,4],["運轉","停止","過載","閥開啟"],"台／只",true),"運轉及閥開啟 DI（0X4050～0X4079）、過載 DI（0X4080～0X4103）","運轉、停止與過載依各設備 DI 計數；閥開啟數由6只電動閥的開啟 DI 加總。資料來源：污廢水點位資料.pdf 第3～4頁。","共用處理廠")
  ].join("");
- return '<section class="subsystem"><div class="subhead"><div><h2>污廢水處理監控</h2><p>依 RS-485 點位分開呈現設備狀態、液位、水質、流量與用電。</p></div><span class="tag">6 charts · 通訊 DI / AI</span></div><div class="grid chart-deck">'+charts+'</div><p class="footnote">污廢水處理廠為集中式共用系統，圖表不依甲／乙區或樓層拆分；所有即時數值目前為介面示意。</p></section>';
+ return '<section class="subsystem"><div class="subhead"><div><h2>污廢水處理監控</h2><p>依 RS-485 點位分開呈現設備狀態與池槽液位。</p></div><span class="tag">3 charts · 通訊 DI</span></div><div class="grid chart-deck">'+charts+'</div><p class="footnote">污廢水處理廠為集中式共用系統，圖表不依甲／乙區或樓層拆分；所有即時數值目前為介面示意。</p></section>';
 }
 function otherExtras(){
  const charts=[

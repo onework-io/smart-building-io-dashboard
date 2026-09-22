@@ -32,11 +32,8 @@ systems[4].groups = [
   ...systems[4].groups.filter(row => !["生活污水回收電盤", "製程廢水處理"].includes(row.equipment)),
   { group: "污廢水處理廠（餐廳與製程廢水）", equipment: "處理設備", quantity: 26, di: ["運轉", "過載"], ai: [] },
   { group: "污廢水處理廠（餐廳與製程廢水）", equipment: "池槽液位", quantity: 3, di: ["H液位", "HH液位"], ai: [] },
-  { group: "污廢水處理廠（餐廳與製程廢水）", equipment: "pH計", quantity: 1, di: [], ai: ["pH值"] },
   { group: "污廢水處理廠（中水回收）", equipment: "處理設備及電動閥", quantity: 30, di: ["運轉", "過載", "閥開啟"], ai: [] },
   { group: "污廢水處理廠（中水回收）", equipment: "池槽液位", quantity: 5, di: ["L液位", "H液位", "HH液位"], ai: [] },
-  { group: "污廢水處理廠（中水回收）", equipment: "流量計", quantity: 2, di: [], ai: ["累積流量", "瞬時流量"] },
-  { group: "污廢水處理廠（中水回收）", equipment: "控制盤電力計量", quantity: 1, di: [], ai: ["電壓V", "電流A", "頻率Hz", "電能kWh"] },
 ];
 
 const phaseOf = area => String(area || "").startsWith("乙") ? "乙區" : String(area || "").startsWith("甲") ? "甲區" : null;
