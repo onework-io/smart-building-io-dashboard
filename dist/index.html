@@ -204,7 +204,7 @@ function relatedEnergy(id){
   cards.push(miniCard("空調電力監控",multiLine([
    {name:"ACMP-1～4",values:histSeries(71,40,40,{int:true,f:.994})},
    {name:"ACSP 配電盤／分電盤",values:histSeries(72,112,82,{int:true,f:.994})}
-  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP-1、2、3、4 多功能電錶及 ACSP 配電盤／分電盤功率電錶：實功率 kW、用電度數 kWh","空調總功率 = Σ ACMP 實功率 + Σ ACSP 實功率；甲／乙區各依該區空調 IO 的黃色彙總分類，不能依樓層完整拆分。","整棟合計"));
+  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP 多功能電錶 4 台及 ACSP 配電盤／分電盤功率電錶（甲區 197、乙區 196）：實功率 kW、用電度數 kWh","甲／乙區各依該區空調 IO 的黃色彙總分類，不能依樓層完整拆分。","整棟合計","資料中台實作差異：ACMP 與 ACSP 兩組分開回報，不相加。ACMP 量的是配電盤、ACSP 含配電盤與分電盤，兩者是否為上下游關係、相加會不會重複計算，IO 表與中工分類表都沒有說明，待真值判定。另中工分類表把 ACSP 拆成二期空調箱電表 60 台與配電盤及分電盤 137 台，前者判定待確認（依備註的 60 點 kW 與 60 點 kWh 反推台數）。"));
   title="空調用電";
  }
  if(id===4){
