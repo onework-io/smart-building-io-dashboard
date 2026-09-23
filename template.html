@@ -95,7 +95,7 @@ function bindAreaSwitch(){app.querySelectorAll("[data-area]").forEach(b=>b.oncli
 function rangeSwitch(){return '<div class="range-switch" aria-label="時間範圍切換">'+rangeKeys.map(k=>'<button data-range="'+k+'" class="'+(histRange===k?"active":"")+'">'+esc(rangeNames[k])+'</button>').join("")+'</div>'}
 function bindRangeSwitch(){app.querySelectorAll("[data-range]").forEach(b=>b.onclick=()=>{histRange=b.dataset.range;localStorage.setItem("histRange",histRange);render()})}
 function hideRate(id){return id===4}
-function chartScope(id){return [2,4,6].includes(id)?"可分樓層":"整棟合計"}
+function chartScope(id){return [2,4,6].includes(id)?"可分樓層":"整區合計"}
 function scopePill(scope){return '<span class="scope-pill '+(scope.includes("樓層")?"floor":"whole")+'">'+esc(scope)+'</span>'}
 function lineChart(values,unit,xLabels){
  const w=720,h=225,p={l:42,r:15,t:15,b:30},min=Math.min(...values)*.88,max=Math.max(...values)*1.08||1,ticks=xLabels||hours;
@@ -169,7 +169,7 @@ function heatmap(rowLabels,colLabels,matrix,unit,size){
  const labs=colLabels.map((cl,j)=>cl?'<text text-anchor="middle" x="'+(p.l+j*cw+cw/2)+'" y="'+(h-6)+'">'+esc(cl)+'</text>':"").join("");
  return '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="熱區圖">'+body+labs+'<text x="2" y="10">'+esc(unit)+'</text></svg><div class="legend"><span><i style="background:'+col(min)+'"></i>低 '+min+'</span><span><i style="background:'+col((min+max)/2)+'"></i>中</span><span><i style="background:'+col(max)+'"></i>高 '+max+'</span></div>';
 }
-function miniCard(title,visual,used,formula,scope="整棟合計",implNote){
+function miniCard(title,visual,used,formula,scope="整區合計",implNote){
  return '<article class="card mini"><div class="panel-head"><h3>'+esc(title)+'</h3>'+scopePill(scope)+'</div><div class="mini-chart">'+visual+'</div><div class="calc"><b>使用：'+esc(used)+'</b>'+esc(formula)+'</div>'+(implNote?[].concat(implNote).map(n=>'<div class="impl">'+esc(n)+'</div>').join(""):"")+'</article>';
 }
 function areaTotal(id){return areaData[areaKeys[id-1]]?.[selectedArea]??0}
@@ -204,7 +204,7 @@ function relatedEnergy(id){
   cards.push(miniCard("空調電力監控",multiLine([
    {name:"ACMP-1～4",values:histSeries(71,40,40,{int:true,f:.994})},
    {name:"ACSP 配電盤／分電盤",values:histSeries(72,112,82,{int:true,f:.994})}
-  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP 多功能電錶 4 台及 ACSP 配電盤／分電盤功率電錶（甲區 197、乙區 196）：實功率 kW、用電度數 kWh","甲／乙區各依該區空調 IO 的黃色彙總分類。IO 表把兩組電錶都列在同一處（甲區 A 棟 B1F、乙區同），所以只到區，不能依棟或樓層拆分。","整棟合計",["待確認（資料中台提出）：ACMP 與 ACSP 是不是上下游？IO 表與中工分類表都沒說，主盤／次盤是我們從台數與點位推的，沒有單線圖。若是上下游，相加會把同一度電算兩次——所以兩組分開回報、不相加，等單線圖或現場真值判定。","待確認（中工 IO 分類完整清單）：二期空調箱電表真的是 60 台嗎？中工是從備註的 60 點 kW 與 60 點 kWh 反推的，自己標了待確認。ACSP 另外 137 台配電盤及分電盤判定明確。"]));
+  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP 多功能電錶 4 台及 ACSP 配電盤／分電盤功率電錶（甲區 197、乙區 196）：實功率 kW、用電度數 kWh","甲／乙區各依該區空調 IO 的黃色彙總分類。IO 表把兩組電錶都列在同一處（甲區 A 棟 B1F、乙區同），所以只到區，不能依棟或樓層拆分。","整區合計",["待確認（資料中台提出）：ACMP 與 ACSP 是不是上下游？IO 表與中工分類表都沒說，主盤／次盤是我們從台數與點位推的，沒有單線圖。若是上下游，相加會把同一度電算兩次——所以兩組分開回報、不相加，等單線圖或現場真值判定。","待確認（中工 IO 分類完整清單）：二期空調箱電表真的是 60 台嗎？中工是從備註的 60 點 kW 與 60 點 kWh 反推的，自己標了待確認。ACSP 另外 137 台配電盤及分電盤判定明確。"]));
   title="空調用電";
  }
  if(id===4){
@@ -239,7 +239,7 @@ function powerAddons(){
 }
 function powerExtras(){
  const generator=[
-  miniCard("發電機輸出功率",miniLine([0,420,785,1030,910,640,310],hours,"kW"),"Real Power（有效功率）、RUNNING（機組運轉）","總輸出功率 = Σ 運轉中發電機 Real Power；未運轉機組不納入。","整棟合計","資料中台實作差異：全部機組的功率都加，不挑運轉中的；運轉台數與併聯台數另外回報。"),
+  miniCard("發電機輸出功率",miniLine([0,420,785,1030,910,640,310],hours,"kW"),"Real Power（有效功率）、RUNNING（機組運轉）","總輸出功率 = Σ 運轉中發電機 Real Power；未運轉機組不納入。","整區合計","資料中台實作差異：全部機組的功率都加，不挑運轉中的；運轉台數與併聯台數另外回報。"),
   miniCard("發電機三相電壓平衡",phaseBars(),"Voltage L1-L2／L2-L3／L1-L3（相間電壓）","電壓不平衡值 = 三相最高電壓 − 三相最低電壓；依 G01～G04 分別比較。"),
   miniCard("發電機告警分布",bars([0,0,1,0,0,0,1,0],["高水溫","低油壓","過載","過壓","超速","低頻","過流","電瓶"],"件",true),"HIGH COOLANT TEMPERATURE、LOW OIL PRESSURE、OVERLOAD、OVERVOLTAGE、OVERSPEED、UNDERFREQUENCY、OVERCURRENT、BATTERY ALARM","告警件數 = 各警報 DI 為 ON 的機組數；共用 ATS／急停／測試訊號另作系統狀態判斷。")
  ].join("");
@@ -268,10 +268,10 @@ function otherExtras(){
   miniCard("接地系統監視器",bars([1.2,1.4],["監視器-01","監視器-02"],"Ω",false),"接地電阻值、電壓值、歸零值、警報設定值 AI","接地警示 = 接地電阻值 ≥ 警報設定值；圖中只比較兩台設備的接地電阻。"),
   miniCard("截水溝淹水偵測",bars([0,0,1,0],["溝-01","溝-02","溝-03","溝-04"],"警報",true),"液位開關 DI × 2","單一設備任一液位開關為 ON，即判定該截水溝出現淹水警示。"),
   miniCard("機坑淹水偵測",bars([0,1,0,0,0,0,0],["A1","A2","A3","A4","A5","A6","A7"],"件",true),"液位開關 DI","淹水數 = 液位開關為 ON 的機坑數；14 台設備可依區域分批顯示。"),
-  miniCard("機房漏水偵測",bars([0,1,0,0,0,0],["B1","B2","B3","B4","B5","B6"],"件",true),"漏液警報 DI、磁簧開關 DI","機房異常 = 漏液警報 ON 或磁簧開關出現非預期開啟。","整棟合計","待確認（中工 IO 分類完整清單）：機房漏水的漏液警報是不是兩台共用一點？算出來是 0.5 點／台，而點位不可分割。"),
-  miniCard("水箱液位監測",bars([0,0,1,0,0,0],["水箱1","水箱2","水箱3","水箱4","水箱5","水箱6"],"件",true),"液位開關 DI、漏液警報 DI、磁簧開關 DI","水箱異常 = 高／低液位開關、漏液警報或箱蓋磁簧異常任一為 ON。","整棟合計","待確認（中工 IO 分類完整清單）：水箱的漏液警報與磁簧開關怎麼分配到單台？算出來是漏液 0.25～0.67、磁簧 1.17～1.25 點／台。分類依據第三階也沒有列水箱設備。"),
-  miniCard("水箱／天井蓋磁簧開關",bars([0,0,0,1,0,0],["區1","區2","區3","區4","區5","區6"],"開啟",true),"磁簧開關 DI","非預期開啟數 = 在非維護時段磁簧開關為開啟的設備數。","整棟合計","待確認（中工 IO 分類完整清單）：水箱／天井蓋磁簧開關算哪一類設備？分類依據第三階沒有列。"),
-  miniCard("污水採樣井預留點位",miniLine([1.8,2.1,2.4,2.2,2.7,2.5,2.3],hours,"m³/h"),"瞬時流量 AI、累計流量 AI、通訊狀態（故障）DI","時段流量使用瞬時流量；今日累計量 = 目前累計流量 − 00:00 累計流量。","整棟合計","待確認（中工 IO 分類完整清單）：污水採樣井算哪一類設備？分類依據第三階沒有列。"),
+  miniCard("機房漏水偵測",bars([0,1,0,0,0,0],["B1","B2","B3","B4","B5","B6"],"件",true),"漏液警報 DI、磁簧開關 DI","機房異常 = 漏液警報 ON 或磁簧開關出現非預期開啟。","整區合計","待確認（中工 IO 分類完整清單）：機房漏水的漏液警報是不是兩台共用一點？算出來是 0.5 點／台，而點位不可分割。"),
+  miniCard("水箱液位監測",bars([0,0,1,0,0,0],["水箱1","水箱2","水箱3","水箱4","水箱5","水箱6"],"件",true),"液位開關 DI、漏液警報 DI、磁簧開關 DI","水箱異常 = 高／低液位開關、漏液警報或箱蓋磁簧異常任一為 ON。","整區合計","待確認（中工 IO 分類完整清單）：水箱的漏液警報與磁簧開關怎麼分配到單台？算出來是漏液 0.25～0.67、磁簧 1.17～1.25 點／台。分類依據第三階也沒有列水箱設備。"),
+  miniCard("水箱／天井蓋磁簧開關",bars([0,0,0,1,0,0],["區1","區2","區3","區4","區5","區6"],"開啟",true),"磁簧開關 DI","非預期開啟數 = 在非維護時段磁簧開關為開啟的設備數。","整區合計","待確認（中工 IO 分類完整清單）：水箱／天井蓋磁簧開關算哪一類設備？分類依據第三階沒有列。"),
+  miniCard("污水採樣井預留點位",miniLine([1.8,2.1,2.4,2.2,2.7,2.5,2.3],hours,"m³/h"),"瞬時流量 AI、累計流量 AI、通訊狀態（故障）DI","時段流量使用瞬時流量；今日累計量 = 目前累計流量 − 00:00 累計流量。","整區合計","待確認（中工 IO 分類完整清單）：污水採樣井算哪一類設備？分類依據第三階沒有列。"),
   miniCard("網管系統（含網通設備）",bars([297,3],["在線","離線"],"台",false),"通訊狀態（故障）DI×300","在線設備數 = 300 − 通訊故障設備數；在線率 = 在線數 ÷ 300 × 100%。IO 表未勾歷史資料記錄與曲線取樣記錄，只能呈現即時值，不畫趨勢。"),
   miniCard("航空障礙燈",bars([0,1],["障礙燈-01","障礙燈-02"],"故障",true),"故障／跳脫 DI、通訊狀態（故障）DI","單台異常 = 任一故障／跳脫 DI 為 ON，或通訊狀態為故障。"),
   miniCard("電子看板",bars([170,2],["在線","離線"],"台",false),"通訊狀態（故障）DI×172","在線看板數 = 172 − 通訊故障數；在線率 = 在線看板數 ÷ 172 × 100%。IO 表未勾歷史資料記錄與曲線取樣記錄，只能呈現即時值，不畫趨勢。")
@@ -305,9 +305,9 @@ function hvacExtras(){
   miniCard("主機系統故障告警分布",bars([1,0,2,0,1].map(v=>v*mult+(mult>1?1:0)),["CHU","CHP","SCHP","CDP","CT"],"件",true),"各群組的故障／跳脫／警報 DI","告警件數 = 該群組故障／跳脫／警報 DI 由 OFF 轉 ON 的次數；CT 因 15 台風扇共用同一類訊號，件數需除以台數才可比較。")
  ].join("");
  const temp=[
-  miniCard("冰水供／回水溫與 ΔT",bandLine(histSeries(21,6.4,1.1),histSeries(22,11.9,1.8),L,"°C",["冰水供水溫","冰水回水溫"]),"冰水系統水管溫度 AI×12（群組總計）、冰水主機冰機溫度 AI×2","ΔT = 回水溫 − 供水溫。ΔT 長期偏低（低於 4°C）代表冰水流量過大或末端閥件無法關斷，是最常見的輸送能耗浪費。"),
-  miniCard("冷卻水塔逼近溫度",bandLine(histSeries(31,26.2,3.2),histSeries(32,30.8,3.0),L,"°C",["外氣濕球溫","冷卻水出水溫"]),"冷卻水系統外氣溫度 AI×1、外氣濕度 AI×1、水管溫度 AI×20（群組總計）","逼近溫度 = 冷卻水塔出水溫 − 外氣濕球溫（濕球由外氣溫度與濕度換算）。逼近溫度持續拉大代表水塔填料阻塞或風扇未全數投入。"),
-  miniCard("BTU 冷量：主表 vs 分表",multiLine([{name:"BTU-P 主表 ×7",values:histSeries(41,620,520,{int:true})},{name:"BTU-S 分表 ×141 合計",values:histSeries(42,560,480,{int:true})}],L,"RTH"),"BTU-P×7 及 BTU-S×141 錶閥組的冰水用量 RTH","主表與分表的差值 = 未被分表覆蓋的冷量（管損與未裝錶區域）。差值長期擴大表示有分表失效或通訊中斷。"),
+  // [hidden] miniCard("冰水供／回水溫與 ΔT",bandLine(histSeries(21,6.4,1.1),histSeries(22,11.9,1.8),L,"°C",["冰水供水溫","冰水回水溫"]),"冰水系統水管溫度 AI×12（群組總計）、冰水主機冰機溫度 AI×2","ΔT = 回水溫 − 供水溫。ΔT 長期偏低（低於 4°C）代表冰水流量過大或末端閥件無法關斷，是最常見的輸送能耗浪費。"),
+  // [hidden] miniCard("冷卻水塔逼近溫度",bandLine(histSeries(31,26.2,3.2),histSeries(32,30.8,3.0),L,"°C",["外氣濕球溫","冷卻水出水溫"]),"冷卻水系統外氣溫度 AI×1、外氣濕度 AI×1、水管溫度 AI×20（群組總計）","逼近溫度 = 冷卻水塔出水溫 − 外氣濕球溫（濕球由外氣溫度與濕度換算）。逼近溫度持續拉大代表水塔填料阻塞或風扇未全數投入。"),
+  // [hidden] miniCard("BTU 冷量：主表 vs 分表",multiLine([{name:"BTU-P 主表 ×7",values:histSeries(41,620,520,{int:true})},{name:"BTU-S 分表 ×141 合計",values:histSeries(42,560,480,{int:true})}],L,"RTH"),"BTU-P×7 及 BTU-S×141 錶閥組的冰水用量 RTH","主表與分表的差值 = 未被分表覆蓋的冷量（管損與未裝錶區域）。差值長期擴大表示有分表失效或通訊中斷。"),
   miniCard("小型冷風機迴風溫度分佈",bars([12,48,126,142,51,12].map(v=>Math.round(v*(selectedArea==="甲區"?1:.97))),["<20","20-22","22-24","24-26","26-28",">28"],"台",false),"小型冷風機×391 的迴風溫度 AI，並以運轉狀態 DI 篩選運轉中的機組","只統計運轉狀態 DI 為 ON 的機組；分箱寬度 2°C。右尾（>28°C）代表該區冷量不足或風機空轉，左尾代表過度供冷。"),
   miniCard("室內溫度達標率",miniLine(histSeries(51,86,12,{int:true,max:100}),L,"%"),"外氣預冷空調箱 PAH×98 及空調箱 AHU×24 的室內溫度 AI","達標率 = 室內溫度 AI 落在 23～26°C 的量測點數 ÷ 有效量測點數 × 100%；通訊異常與空值不列入分母。"),
   miniCard("空調箱設定溫度偏差",hbars([["PAH-B2-07",3.4],["AHU-5F-02",2.9],["PAH-3F-11",2.1],["AHU-7F-01",1.8],["PAH-1F-04",1.2],["PAH-9F-06",.7]]," °C",true),"PAH／AHU 的室內溫度 AI 與外氣溫度 AI","偏差 = |室內溫度 AI − 設定值|，取偏差最大的前 6 台。偏差長期偏大的機組優先排查閥件與風門。")
@@ -327,7 +327,7 @@ function hvacExtras(){
  ].join("");
  const sec=(title,desc,tag,cards,foot)=>'<section class="subsystem"><div class="subhead"><div><h2>'+esc(title)+'</h2><p>'+esc(desc)+'</p></div><span class="tag">'+esc(tag)+'</span></div><div class="grid chart-deck">'+cards+'</div>'+(foot?'<p class="footnote">'+esc(foot)+'</p>':"")+'</section>';
  return sec("主機水側運轉","冰水主機與泵浦、水塔的啟停台數、輪機時序與告警。","3 charts · "+m.note,plant)
-  +sec("溫度與溫差分析","冰水與冷卻水的供回水溫、逼近溫度、冷量與末端迴風溫度。","6 charts · "+m.note,temp)
+  +sec("溫度與溫差分析","末端迴風溫度與相關溫度分析。","3 charts · "+m.note,temp)
   +sec("空氣側、空品與維護","PAH／AHU 的濾網、CO₂ 與狀態告警。","4 charts · "+m.note,air)
   +sec("停車場通風","CO 濃度與送排風機的連動與可用率。","2 charts · "+m.note,parking,"空調全系統沒有可用的樓層欄位，所有圖表均為整棟或分區合計；歷史區間的數值為示意序列，串接 BMS 後以實際歷史資料替換。");
 }
