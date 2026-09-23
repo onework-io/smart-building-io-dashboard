@@ -170,7 +170,7 @@ function heatmap(rowLabels,colLabels,matrix,unit,size){
  return '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="熱區圖">'+body+labs+'<text x="2" y="10">'+esc(unit)+'</text></svg><div class="legend"><span><i style="background:'+col(min)+'"></i>低 '+min+'</span><span><i style="background:'+col((min+max)/2)+'"></i>中</span><span><i style="background:'+col(max)+'"></i>高 '+max+'</span></div>';
 }
 function miniCard(title,visual,used,formula,scope="整棟合計",implNote){
- return '<article class="card mini"><div class="panel-head"><h3>'+esc(title)+'</h3>'+scopePill(scope)+'</div><div class="mini-chart">'+visual+'</div><div class="calc"><b>使用：'+esc(used)+'</b>'+esc(formula)+'</div>'+(implNote?'<div class="impl">'+esc(implNote)+'</div>':"")+'</article>';
+ return '<article class="card mini"><div class="panel-head"><h3>'+esc(title)+'</h3>'+scopePill(scope)+'</div><div class="mini-chart">'+visual+'</div><div class="calc"><b>使用：'+esc(used)+'</b>'+esc(formula)+'</div>'+(implNote?[].concat(implNote).map(n=>'<div class="impl">'+esc(n)+'</div>').join(""):"")+'</article>';
 }
 function areaTotal(id){return areaData[areaKeys[id-1]]?.[selectedArea]??0}
 function floorEntries(key){
@@ -204,7 +204,7 @@ function relatedEnergy(id){
   cards.push(miniCard("空調電力監控",multiLine([
    {name:"ACMP-1～4",values:histSeries(71,40,40,{int:true,f:.994})},
    {name:"ACSP 配電盤／分電盤",values:histSeries(72,112,82,{int:true,f:.994})}
-  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP 多功能電錶 4 台及 ACSP 配電盤／分電盤功率電錶（甲區 197、乙區 196）：實功率 kW、用電度數 kWh","甲／乙區各依該區空調 IO 的黃色彙總分類，不能依樓層完整拆分。","整棟合計","資料中台實作差異：ACMP 與 ACSP 兩組分開回報，不相加。ACMP 量的是配電盤、ACSP 含配電盤與分電盤，兩者是否為上下游關係、相加會不會重複計算，IO 表與中工分類表都沒有說明，待真值判定。另中工分類表把 ACSP 拆成二期空調箱電表 60 台與配電盤及分電盤 137 台，前者判定待確認（依備註的 60 點 kW 與 60 點 kWh 反推台數）。"));
+  ],sparse(m.lineLabels,m.tick),"kW"),"ACMP 多功能電錶 4 台及 ACSP 配電盤／分電盤功率電錶（甲區 197、乙區 196）：實功率 kW、用電度數 kWh","甲／乙區各依該區空調 IO 的黃色彙總分類，不能依樓層完整拆分。","整棟合計",["資料中台實作差異：ACMP 與 ACSP 兩組分開回報，不相加。ACMP 量的是配電盤、ACSP 含配電盤與分電盤，兩者是否為上下游關係、相加會不會重複計算，IO 表與中工分類表都沒有說明，待真值判定。","待確認（中工 IO 分類完整清單）：ACSP 的 197 台中，二期空調箱電表 60 台是依備註的 60 點 kW 與 60 點 kWh 反推台數，中工判定待確認；另 137 台配電盤及分電盤判定明確。"]));
   title="空調用電";
  }
  if(id===4){
