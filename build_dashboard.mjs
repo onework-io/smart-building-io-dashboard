@@ -27,6 +27,12 @@ const systems = source.categories.map((category, index) => ({
   })).filter(row => row.di.length || row.ai.length)
 }));
 
+// 門禁讀卡機依展示需求改用實際要呈現的門鎖與警報名稱。
+const accessCardReader = systems[7]?.groups.find(row => row.equipment === "門禁讀卡機");
+if (accessCardReader) {
+  accessCardReader.di = ["狀態", "上鎖/開鎖", "警報：卡機斷線/卡機破壞/門破壞/門未關妥"];
+}
+
 // 污廢水點位由補充的 RS-485 通訊表提供，集中顯示於 05 給排水。
 systems[4].groups = [
   ...systems[4].groups.filter(row => !["生活污水回收電盤", "製程廢水處理"].includes(row.equipment)),
