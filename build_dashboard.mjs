@@ -33,13 +33,10 @@ if (accessCardReader) {
   accessCardReader.di = ["狀態", "上鎖/開鎖", "警報：卡機斷線/卡機破壞/門破壞/門未關妥"];
 }
 
-// 污廢水點位由補充的 RS-485 通訊表提供，集中顯示於 05 給排水。
+// 污廢水處理電盤在 IO 表只有「狀態×100／×85」，點位目錄沒分運轉、過載、液位；RS-485 位址表的點名對不上目錄，先只列 IO 表有的。
 systems[4].groups = [
   ...systems[4].groups.filter(row => !["生活污水回收電盤", "製程廢水處理"].includes(row.equipment)),
-  { group: "污廢水處理廠（餐廳與製程廢水）", equipment: "處理設備", quantity: 26, di: ["運轉", "過載"], ai: [] },
-  { group: "污廢水處理廠（餐廳與製程廢水）", equipment: "池槽液位", quantity: 3, di: ["H液位", "HH液位"], ai: [] },
-  { group: "污廢水處理廠（中水回收）", equipment: "處理設備及電動閥", quantity: 30, di: ["運轉", "過載", "閥開啟"], ai: [] },
-  { group: "污廢水處理廠（中水回收）", equipment: "池槽液位", quantity: 5, di: ["L液位", "H液位", "HH液位"], ai: [] },
+  { group: "污廢水處理廠", equipment: "生活污水回收電盤、製程廢水處理電盤", quantity: 4, di: ["狀態×100 / 85（點位目錄未區分運轉、過載、液位）", "通訊狀態 (故障)"], ai: [] },
 ];
 
 const phaseOf = area => String(area || "").startsWith("乙") ? "乙區" : String(area || "").startsWith("甲") ? "甲區" : null;
